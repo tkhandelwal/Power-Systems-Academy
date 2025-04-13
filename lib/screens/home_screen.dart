@@ -9,11 +9,11 @@ import 'package:powersystemsacademy/models/recent_activity.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
+@override
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TabController _tabController;
   
   // Animation controller for the welcome card
