@@ -131,7 +131,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   Opacity(
                     opacity: 0.1,
                     child: Image.network(
-                      'https://via.placeholder.com/400x200?text=Circuit+Pattern',
+                      'https://pixabay.com/photos/power-distribution-electricity-1367130/',
                       fit: BoxFit.cover,
                     ),
                   ),

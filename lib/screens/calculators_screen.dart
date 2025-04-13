@@ -1,7 +1,11 @@
 // lib/screens/calculators_screen.dart
 import 'package:flutter/material.dart';
 import 'package:powersystemsacademy/calculators/three_phase_power_calculator.dart';
+import 'package:powersystemsacademy/calculators/power_factor_calculator.dart';
+import 'package:powersystemsacademy/calculators/transformer_sizing_calculator.dart';
+import 'package:powersystemsacademy/calculators/voltage_drop_calculator.dart';
 
+// Updated CalculatorsScreen to avoid deprecated color methods
 class CalculatorsScreen extends StatelessWidget {
   const CalculatorsScreen({super.key});
 
@@ -20,9 +24,9 @@ class CalculatorsScreen extends StatelessWidget {
             iconData: Icons.flash_on,
             calculators: [
               {'name': 'Three-Phase Power', 'implemented': true},
-              {'name': 'Power Factor Correction', 'implemented': false},
-              {'name': 'Transformer Sizing', 'implemented': false},
-              {'name': 'Voltage Drop', 'implemented': false},
+              {'name': 'Power Factor Correction', 'implemented': true},
+              {'name': 'Transformer Sizing', 'implemented': true},
+              {'name': 'Voltage Drop', 'implemented': true},
               {'name': 'Fault Current Analysis', 'implemented': false},
             ],
             onCategoryTap: () {
@@ -134,7 +138,7 @@ class CalculatorCategoryCard extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor.withAlpha(51),
+                    backgroundColor: Colors.blue.shade100, // Light primary color
                     child: Icon(
                       iconData,
                       color: Theme.of(context).primaryColor,
@@ -172,7 +176,7 @@ class CalculatorCategoryCard extends StatelessWidget {
                   return ActionChip(
                     label: Text(calculator['name']),
                     backgroundColor: calculator['implemented'] 
-                        ? Colors.green.withOpacity(0.2) 
+                        ? Colors.green.shade100  // Light green without using opacity
                         : Colors.grey[200],
                     avatar: calculator['implemented']
                         ? Icon(Icons.check_circle, size: 16, color: Colors.green)
@@ -186,7 +190,28 @@ class CalculatorCategoryCard extends StatelessWidget {
                             builder: (context) => ThreePhaseCalculatorScreen(),
                           ),
                         );
-                      } else if (!calculator['implemented']) {
+                      } else if (calculator['name'] == 'Power Factor Correction' && calculator['implemented']) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PowerFactorCalculatorScreen(),
+                          ),
+                        );
+                        } else if (calculator['name'] == 'Transformer Sizing' && calculator['implemented']) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TransformerSizingCalculatorScreen(),
+                          ),
+                        );
+                        } else if (calculator['name'] == 'Voltage Drop' && calculator['implemented']) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VoltageDropCalculatorScreen(),
+                          ),
+                        );
+                          } else if (!calculator['implemented']) {
                         // Show coming soon snackbar for unimplemented calculators
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

@@ -10,6 +10,8 @@ import 'package:powersystemsacademy/screens/study_materials_screen.dart';
 import 'package:powersystemsacademy/theme/app_theme.dart';
 import 'package:powersystemsacademy/calculators/three_phase_power_calculator.dart';
 import 'package:powersystemsacademy/calculators/power_factor_calculator.dart';
+import 'package:powersystemsacademy/calculators/transformer_sizing_calculator.dart';
+import 'package:powersystemsacademy/calculators/voltage_drop_calculator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
@@ -92,6 +94,8 @@ class PowerEngineeringPrepApp extends StatelessWidget {
         '/calculators': (context) => CalculatorsScreen(),
         '/calculators/three_phase': (context) => ThreePhaseCalculatorScreen(),
         '/calculators/power_factor': (context) => PowerFactorCalculatorScreen(),
+        '/calculators/voltage_drop': (context) => VoltageDropCalculatorScreen(),
+        '/calculators/transformer_sizing': (context) => TransformerSizingCalculatorScreen(),
         '/learning_resources': (context) => LearningResourcesScreen(),
         '/community': (context) => CommunityScreen(),
         '/news': (context) => NewsScreen(),
