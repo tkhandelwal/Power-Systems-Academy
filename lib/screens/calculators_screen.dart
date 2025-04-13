@@ -1,4 +1,6 @@
+// lib/screens/calculators_screen.dart
 import 'package:flutter/material.dart';
+import 'package:powersystemsacademy/calculators/three_phase_power_calculator.dart';
 
 class CalculatorsScreen extends StatelessWidget {
   const CalculatorsScreen({super.key});
@@ -17,14 +19,15 @@ class CalculatorsScreen extends StatelessWidget {
             description: 'Calculate power, voltage, current and more',
             iconData: Icons.flash_on,
             calculators: [
-              'Three-Phase Power',
-              'Power Factor Correction',
-              'Transformer Sizing',
-              'Voltage Drop',
-              'Fault Current Analysis',
+              {'name': 'Three-Phase Power', 'implemented': true},
+              {'name': 'Power Factor Correction', 'implemented': false},
+              {'name': 'Transformer Sizing', 'implemented': false},
+              {'name': 'Voltage Drop', 'implemented': false},
+              {'name': 'Fault Current Analysis', 'implemented': false},
             ],
             onCategoryTap: () {
-              // Navigate to power systems calculators
+              // Navigate to power systems calculators list
+              // This is now redundant as we're showing the list directly
             },
           ),
           SizedBox(height: 16),
@@ -33,14 +36,14 @@ class CalculatorsScreen extends StatelessWidget {
             description: 'Electrical system and component calculations',
             iconData: Icons.electrical_services,
             calculators: [
-              'Conductor Sizing',
-              'Conduit Fill',
-              'Circuit Breaker Coordination',
-              'Motor Starting',
-              'Short Circuit',
+              {'name': 'Conductor Sizing', 'implemented': false},
+              {'name': 'Conduit Fill', 'implemented': false},
+              {'name': 'Circuit Breaker Coordination', 'implemented': false},
+              {'name': 'Motor Starting', 'implemented': false},
+              {'name': 'Short Circuit', 'implemented': false},
             ],
             onCategoryTap: () {
-              // Navigate to electrical calculators
+              // Navigate to electrical calculators list
             },
           ),
           SizedBox(height: 16),
@@ -49,11 +52,11 @@ class CalculatorsScreen extends StatelessWidget {
             description: 'Thermal and HVAC system calculations',
             iconData: Icons.ac_unit,
             calculators: [
-              'Heat Load',
-              'Psychrometrics',
-              'Duct Sizing',
-              'Pump Sizing',
-              'Cooling Tower Efficiency',
+              {'name': 'Heat Load', 'implemented': false},
+              {'name': 'Psychrometrics', 'implemented': false},
+              {'name': 'Duct Sizing', 'implemented': false},
+              {'name': 'Pump Sizing', 'implemented': false},
+              {'name': 'Cooling Tower Efficiency', 'implemented': false},
             ],
             onCategoryTap: () {
               // Navigate to HVAC calculators
@@ -65,11 +68,11 @@ class CalculatorsScreen extends StatelessWidget {
             description: 'Calculate flow rates, pressure drops and more',
             iconData: Icons.waves,
             calculators: [
-              'Pipe Sizing',
-              'Flow Rate',
-              'Head Loss',
-              'Pump Power',
-              'Valve Sizing',
+              {'name': 'Pipe Sizing', 'implemented': false},
+              {'name': 'Flow Rate', 'implemented': false},
+              {'name': 'Head Loss', 'implemented': false},
+              {'name': 'Pump Power', 'implemented': false},
+              {'name': 'Valve Sizing', 'implemented': false},
             ],
             onCategoryTap: () {
               // Navigate to fluid dynamics calculators
@@ -81,11 +84,11 @@ class CalculatorsScreen extends StatelessWidget {
             description: 'Economic analysis for power projects',
             iconData: Icons.money,
             calculators: [
-              'Present Worth',
-              'Rate of Return',
-              'Life Cycle Cost',
-              'Payback Period',
-              'Benefit-Cost Ratio',
+              {'name': 'Present Worth', 'implemented': false},
+              {'name': 'Rate of Return', 'implemented': false},
+              {'name': 'Life Cycle Cost', 'implemented': false},
+              {'name': 'Payback Period', 'implemented': false},
+              {'name': 'Benefit-Cost Ratio', 'implemented': false},
             ],
             onCategoryTap: () {
               // Navigate to economics calculators
@@ -101,11 +104,11 @@ class CalculatorCategoryCard extends StatelessWidget {
   final String title;
   final String description;
   final IconData iconData;
-  final List<String> calculators;
+  final List<Map<String, dynamic>> calculators;
   final VoidCallback onCategoryTap;
 
   const CalculatorCategoryCard({
-    super.key, // Use super.key instead of Key? key
+    super.key,
     required this.title,
     required this.description,
     required this.iconData,
@@ -131,7 +134,7 @@ class CalculatorCategoryCard extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor.withAlpha(51), // 0.2 * 255 = 51
+                    backgroundColor: Theme.of(context).primaryColor.withAlpha(51),
                     child: Icon(
                       iconData,
                       color: Theme.of(context).primaryColor,
@@ -159,7 +162,6 @@ class CalculatorCategoryCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right),
                 ],
               ),
               SizedBox(height: 12),
@@ -167,9 +169,34 @@ class CalculatorCategoryCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: calculators.map((calculator) {
-                  return Chip(
-                    label: Text(calculator),
-                    backgroundColor: Colors.grey[200],
+                  return ActionChip(
+                    label: Text(calculator['name']),
+                    backgroundColor: calculator['implemented'] 
+                        ? Colors.green.withOpacity(0.2) 
+                        : Colors.grey[200],
+                    avatar: calculator['implemented']
+                        ? Icon(Icons.check_circle, size: 16, color: Colors.green)
+                        : null,
+                    onPressed: () {
+                      // Navigate to the specific calculator when chip is tapped
+                      if (calculator['name'] == 'Three-Phase Power' && calculator['implemented']) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ThreePhaseCalculatorScreen(),
+                          ),
+                        );
+                      } else if (!calculator['implemented']) {
+                        // Show coming soon snackbar for unimplemented calculators
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${calculator['name']} calculator coming soon!'),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
                   );
                 }).toList(),
               ),

@@ -1,3 +1,4 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:powersystemsacademy/widgets/countdown_card.dart';
 import 'package:powersystemsacademy/widgets/progress_card.dart';
@@ -12,7 +13,13 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  
+  // Animation controller for the welcome card
+  late AnimationController _animationController;
+  late Animation<double> _fadeInAnimation;
+  
   final List<RecentActivity> recentActivities = [
     RecentActivity(
       title: 'Completed Practice Quiz',
@@ -45,115 +52,319 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1200),
+    );
+    
+    _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(0.2, 0.8, curve: Curves.easeInOut),
+      ),
+    );
+    
+    _animationController.forward();
+  }
+  
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('PE Power Prep'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              // Show notifications
-            },
+      body: CustomScrollView(
+        slivers: [
+          // App Bar with flexible space
+          SliverAppBar(
+            expandedHeight: 180.0,
+            floating: false,
+            pinned: true,
+            backgroundColor: Theme.of(context).primaryColor,
+            actions: [
+              IconButton(
+                icon: Icon(Icons.notifications, color: Colors.white),
+                onPressed: () {
+                  // Show notifications
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.settings, color: Colors.white),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/settings');
+                },
+              ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'PE Power Prep',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Gradient background
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).primaryColor.withOpacity(0.8),
+                          Theme.of(context).primaryColor,
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Circuit pattern overlay
+                  Opacity(
+                    opacity: 0.1,
+                    child: Image.network(
+                      'https://via.placeholder.com/400x200?text=Circuit+Pattern',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  // Bottom gradient shadow for better text visibility
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 80,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.3),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Main content
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Welcome Card with animation
+                  FadeTransition(
+                    opacity: _fadeInAnimation,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundColor: Theme.of(context).primaryColor,
+                              child: Text(
+                                'JS',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Welcome back, John!',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'Ready to continue your exam prep?',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  SizedBox(height: 24),
+                  
+                  // Countdown and Progress Row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CountdownCard(
+                          daysRemaining: 75,
+                          onSetDate: () {
+                            _showDatePicker(context);
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 16.0),
+                      Expanded(
+                        child: ProgressCard(
+                          progressPercentage: 65,
+                          onViewProgress: () {
+                            Navigator.pushNamed(context, '/profile');
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  SizedBox(height: 24),
+                  
+                  // Tab navigation for quick access
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TabBar(
+                      controller: _tabController,
+                      indicator: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.grey[700],
+                      tabs: [
+                        Tab(text: 'Study'),
+                        Tab(text: 'Tools'),
+                        Tab(text: 'Community'),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: 16),
+                  
+                  // Tab content
+                  SizedBox(
+                    height: 220,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        // Study Tab
+                        _buildStudyTab(),
+                        
+                        // Tools Tab
+                        _buildToolsTab(),
+                        
+                        // Community Tab
+                        _buildCommunityTab(),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: 24),
+                  
+                  // Recent Activity Section
+                  Text(
+                    'Recent Activity',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  RecentActivityCard(activities: recentActivities),
+                  
+                  SizedBox(height: 24),
+                  
+                  // Tips and Motivation Card
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    color: Colors.amber[50],
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.lightbulb,
+                                color: Colors.amber[700],
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Tip of the Day',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amber[900],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            'When studying protection schemes, focus on understanding the principles behind coordination rather than memorizing specific settings.',
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                // Show more tips
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.amber[900],
+                              ),
+                              child: Text('More Tips'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
       drawer: buildDrawer(context),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Dashboard',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            SizedBox(height: 16.0),
-            
-            // Countdown and Progress Row
-            Row(
-              children: [
-                Expanded(
-                  child: CountdownCard(
-                    daysRemaining: 75,
-                    onSetDate: () {
-                      // Show date picker
-                    },
-                  ),
-                ),
-                SizedBox(width: 16.0),
-                Expanded(
-                  child: ProgressCard(
-                    progressPercentage: 65,
-                    onViewProgress: () {
-                      Navigator.pushNamed(context, '/profile');
-                    },
-                  ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: 24.0),
-            Text(
-              'Quick Access',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            SizedBox(height: 16.0),
-            
-            // Feature Cards Grid
-            GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16.0,
-              mainAxisSpacing: 16.0,
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              children: [
-                FeatureCard(
-                  title: 'Practice Questions',
-                  description: 'Test your knowledge',
-                  iconData: Icons.quiz,
-                  onTap: () => Navigator.pushNamed(context, '/study_materials'),
-                ),
-                FeatureCard(
-                  title: 'Calculators',
-                  description: 'Power engineering tools',
-                  iconData: Icons.calculate,
-                  onTap: () => Navigator.pushNamed(context, '/calculators'),
-                ),
-                FeatureCard(
-                  title: 'Video Lectures',
-                  description: 'Learn from experts',
-                  iconData: Icons.video_library,
-                  onTap: () => Navigator.pushNamed(context, '/learning_resources'),
-                ),
-                FeatureCard(
-                  title: 'Formula Sheets',
-                  description: 'Quick reference',
-                  iconData: Icons.functions,
-                  onTap: () => Navigator.pushNamed(context, '/learning_resources'),
-                ),
-                FeatureCard(
-                  title: 'Community',
-                  description: 'Connect with others',
-                  iconData: Icons.people,
-                  onTap: () => Navigator.pushNamed(context, '/community'),
-                ),
-                FeatureCard(
-                  title: 'News & Updates',
-                  description: 'Stay informed',
-                  iconData: Icons.newspaper,
-                  onTap: () => Navigator.pushNamed(context, '/news'),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: 24.0),
-            RecentActivityCard(activities: recentActivities),
-          ],
-        ),
-      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        selectedItemColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Colors.grey[600],
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -199,106 +410,337 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+  
+  // Study tab content
+  Widget _buildStudyTab() {
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 12.0,
+      mainAxisSpacing: 12.0,
+      children: [
+        FeatureCard(
+          title: 'Practice Questions',
+          description: 'Test your knowledge',
+          iconData: Icons.quiz,
+          onTap: () => Navigator.pushNamed(context, '/study_materials'),
+        ),
+        FeatureCard(
+          title: 'Flashcards',
+          description: 'Quick study aids',
+          iconData: Icons.style,
+          onTap: () => Navigator.pushNamed(context, '/study_materials'),
+        ),
+        FeatureCard(
+          title: 'Video Lectures',
+          description: 'Learn from experts',
+          iconData: Icons.video_library,
+          onTap: () => Navigator.pushNamed(context, '/learning_resources'),
+        ),
+        FeatureCard(
+          title: 'Study Plan',
+          description: 'Organized learning',
+          iconData: Icons.calendar_today,
+          onTap: () => Navigator.pushNamed(context, '/profile'),
+        ),
+      ],
+    );
+  }
+  
+  // Tools tab content
+  Widget _buildToolsTab() {
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 12.0,
+      mainAxisSpacing: 12.0,
+      children: [
+        FeatureCard(
+          title: 'Calculators',
+          description: 'Power engineering tools',
+          iconData: Icons.calculate,
+          onTap: () => Navigator.pushNamed(context, '/calculators'),
+        ),
+        FeatureCard(
+          title: 'Formula Sheets',
+          description: 'Quick reference',
+          iconData: Icons.functions,
+          onTap: () => Navigator.pushNamed(context, '/learning_resources'),
+        ),
+        FeatureCard(
+          title: 'Code References',
+          description: 'NEC and standards',
+          iconData: Icons.book,
+          onTap: () => Navigator.pushNamed(context, '/learning_resources'),
+        ),
+        FeatureCard(
+          title: 'Unit Converter',
+          description: 'Convert measurements',
+          iconData: Icons.swap_horiz,
+          onTap: () => _showComingSoonSnackBar(context),
+        ),
+      ],
+    );
+  }
+  
+  // Community tab content
+  Widget _buildCommunityTab() {
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 12.0,
+      mainAxisSpacing: 12.0,
+      children: [
+        FeatureCard(
+          title: 'Discussion Forums',
+          description: 'Connect with peers',
+          iconData: Icons.forum,
+          onTap: () => Navigator.pushNamed(context, '/community'),
+        ),
+        FeatureCard(
+          title: 'Study Groups',
+          description: 'Collaborative learning',
+          iconData: Icons.people,
+          onTap: () => Navigator.pushNamed(context, '/community'),
+        ),
+        FeatureCard(
+          title: 'Ask Questions',
+          description: 'Get expert answers',
+          iconData: Icons.help,
+          onTap: () => Navigator.pushNamed(context, '/community'),
+        ),
+        FeatureCard(
+          title: 'News & Updates',
+          description: 'Stay informed',
+          iconData: Icons.newspaper,
+          onTap: () => Navigator.pushNamed(context, '/news'),
+        ),
+      ],
+    );
+  }
+  
+  void _showDatePicker(BuildContext context) {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(Duration(days: 75)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 365)),
+    ).then((date) {
+      if (date != null) {
+        // Calculate days remaining and update state
+        final daysRemaining = date.difference(DateTime.now()).inDays;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Exam date set! $daysRemaining days remaining.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+  }
+  
+  void _showComingSoonSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('This feature is coming soon!'),
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
 
   Drawer buildDrawer(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
-          DrawerHeader(
+          // Drawer header with app branding and user info
+          UserAccountsDrawerHeader(
+            accountName: Text(
+              'John Smith',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            accountEmail: Text('PE Candidate'),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Text(
+                'JS',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
+          ),
+          
+          // Main navigation items
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
               children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.school,
-                    size: 50,
-                    color: Theme.of(context).primaryColor,
+                DrawerNavigationItem(
+                  title: 'Dashboard',
+                  icon: Icons.dashboard,
+                  isSelected: true,
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                DrawerNavigationItem(
+                  title: 'Study Materials',
+                  icon: Icons.book,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/study_materials');
+                  },
+                ),
+                DrawerNavigationItem(
+                  title: 'Calculators',
+                  icon: Icons.calculate,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/calculators');
+                  },
+                ),
+                DrawerNavigationItem(
+                  title: 'Learning Resources',
+                  icon: Icons.video_library,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/learning_resources');
+                  },
+                ),
+                DrawerNavigationItem(
+                  title: 'Community',
+                  icon: Icons.people,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/community');
+                  },
+                ),
+                DrawerNavigationItem(
+                  title: 'News & Updates',
+                  icon: Icons.newspaper,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/news');
+                  },
+                ),
+                Divider(),
+                DrawerNavigationItem(
+                  title: 'Profile',
+                  icon: Icons.person,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/profile');
+                  },
+                ),
+                DrawerNavigationItem(
+                  title: 'Settings',
+                  icon: Icons.settings,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/settings');
+                  },
+                ),
+              ],
+            ),
+          ),
+          
+          // App version info and logout button at bottom
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Divider(),
+                SizedBox(height: 8),
+                Text(
+                  'App Version 1.0.0',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
                   ),
                 ),
-                SizedBox(height: 10),
-                Text(
-                  'PE Power Prep',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
+                SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Show logout dialog
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Log Out'),
+                        content: Text('Are you sure you want to log out?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              // Implement logout logic
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: Text('Log Out'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.logout),
+                  label: Text('Log Out'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    minimumSize: Size(double.infinity, 40),
                   ),
                 ),
               ],
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.dashboard),
-            title: Text('Dashboard'),
-            selected: true,
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.book),
-            title: Text('Study Materials'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/study_materials');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.calculate),
-            title: Text('Calculators'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/calculators');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.video_library),
-            title: Text('Learning Resources'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/learning_resources');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.people),
-            title: Text('Community'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/community');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.newspaper),
-            title: Text('News & Updates'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/news');
-            },
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Profile'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/profile');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
         ],
+      ),
+    );
+  }
+}
+
+// Custom drawer navigation item widget for consistent styling
+class DrawerNavigationItem extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isSelected;
+
+  const DrawerNavigationItem({
+    Key? key,
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    this.isSelected = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isSelected ? Theme.of(context).primaryColor : Colors.grey[600],
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isSelected ? Theme.of(context).primaryColor : Colors.black,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      selected: isSelected,
+      onTap: onTap,
+      selectedTileColor: Theme.of(context).primaryColor.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
       ),
     );
   }
