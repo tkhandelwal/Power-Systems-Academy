@@ -722,7 +722,7 @@ class ShortCircuitCalculatorScreenState extends State<ShortCircuitCalculatorScre
                         SizedBox(height: 8),
                         ResultItem(
                           label: 'X/R Ratio:',
-                          value: '${(_totalReactance / _totalResistance).toStringAsFixed(2)}',
+                          value: (_totalReactance / _totalResistance).toStringAsFixed(2),
                           icon: Icons.functions,
                           iconColor: Colors.teal,
                         ),
