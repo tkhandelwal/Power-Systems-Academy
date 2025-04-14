@@ -14,6 +14,7 @@ import 'package:powersystemsacademy/calculators/transformer_sizing_calculator.da
 import 'package:powersystemsacademy/calculators/voltage_drop_calculator.dart';
 import 'package:powersystemsacademy/calculators/short_circuit_calculator.dart'; // Import the new calculator
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:provider/provider.dart';
 
 // Theme provider to manage app theme throughout the app
