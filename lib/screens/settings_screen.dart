@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  SettingsScreenState createState() => SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
   bool _darkModeEnabled = false;
   bool _downloadOverWifi = true;
@@ -298,10 +300,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 );
               },
-              child: Text('Clear'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),
+              child: Text('Clear'),
             ),
           ],
         );
@@ -329,10 +331,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Navigator.of(context).pop();
                 // Navigate to login screen
               },
-              child: Text('Log Out'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),
+              child: Text('Log Out'),
             ),
           ],
         );

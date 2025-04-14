@@ -5,10 +5,10 @@ class CountdownCard extends StatelessWidget {
   final VoidCallback onSetDate;
 
   const CountdownCard({
-    Key? key,
+    super.key,
     required this.daysRemaining,
     required this.onSetDate,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,11 +42,11 @@ class CountdownCard extends StatelessWidget {
             SizedBox(height: 12),
             ElevatedButton(
               onPressed: onSetDate,
-              child: Text('Set Exam Date'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 minimumSize: Size(double.infinity, 36),
               ),
+              child: Text('Set Exam Date'),
             ),
           ],
         ),

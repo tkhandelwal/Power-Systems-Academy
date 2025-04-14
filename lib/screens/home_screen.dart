@@ -121,7 +121,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Theme.of(context).primaryColor.withOpacity(0.8),
+                          Theme.of(context).primaryColor.withAlpha((0.8 * 255).round()),
                           Theme.of(context).primaryColor,
                         ],
                       ),
@@ -148,7 +148,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.3),
+                            Colors.black.withAlpha((0.3 * 255).round()),
                           ],
                         ),
                       ),
@@ -715,12 +715,12 @@ class DrawerNavigationItem extends StatelessWidget {
   final bool isSelected;
 
   const DrawerNavigationItem({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.onTap,
     this.isSelected = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -738,7 +738,7 @@ class DrawerNavigationItem extends StatelessWidget {
       ),
       selected: isSelected,
       onTap: onTap,
-      selectedTileColor: Theme.of(context).primaryColor.withOpacity(0.1),
+      selectedTileColor: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),

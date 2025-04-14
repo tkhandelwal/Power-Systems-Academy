@@ -6,10 +6,10 @@ class VoltageDropCalculatorScreen extends StatefulWidget {
   const VoltageDropCalculatorScreen({super.key});
 
   @override
-  _VoltageDropCalculatorScreenState createState() => _VoltageDropCalculatorScreenState();
+  VoltageDropCalculatorScreenState createState() => VoltageDropCalculatorScreenState();
 }
 
-class _VoltageDropCalculatorScreenState extends State<VoltageDropCalculatorScreen> {
+class VoltageDropCalculatorScreenState extends State<VoltageDropCalculatorScreen> {
   // Form key for validation
   final _formKey = GlobalKey<FormState>();
   
@@ -690,12 +690,12 @@ class ResultItem extends StatelessWidget {
   final Color iconColor;
 
   const ResultItem({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.icon,
     required this.iconColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -732,11 +732,11 @@ class BenefitItem extends StatelessWidget {
   final Color iconColor;
 
   const BenefitItem({
-    Key? key,
+    super.key,
     required this.text,
     required this.icon,
     required this.iconColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

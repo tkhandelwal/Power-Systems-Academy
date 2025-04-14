@@ -6,10 +6,10 @@ class PowerFactorCalculatorScreen extends StatefulWidget {
   const PowerFactorCalculatorScreen({super.key});
 
   @override
-  _PowerFactorCalculatorScreenState createState() => _PowerFactorCalculatorScreenState();
+  PowerFactorCalculatorScreenState createState() => PowerFactorCalculatorScreenState();
 }
 
-class _PowerFactorCalculatorScreenState extends State<PowerFactorCalculatorScreen> {
+class PowerFactorCalculatorScreenState extends State<PowerFactorCalculatorScreen> {
   // Form key for validation
   final _formKey = GlobalKey<FormState>();
   
@@ -373,7 +373,7 @@ class _PowerFactorCalculatorScreenState extends State<PowerFactorCalculatorScree
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -428,7 +428,7 @@ class _PowerFactorCalculatorScreenState extends State<PowerFactorCalculatorScree
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Theme.of(context).primaryColor.withOpacity(0.3),
+                              color: Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
                             ),
                           ),
                           child: Column(
@@ -556,11 +556,11 @@ class ResultItem extends StatelessWidget {
   final IconData icon;
 
   const ResultItem({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -596,10 +596,10 @@ class BenefitItem extends StatelessWidget {
   final IconData icon;
 
   const BenefitItem({
-    Key? key,
+    super.key,
     required this.text,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

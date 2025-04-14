@@ -6,10 +6,10 @@ class ThreePhaseCalculatorScreen extends StatefulWidget {
   const ThreePhaseCalculatorScreen({super.key});
 
   @override
-  _ThreePhaseCalculatorScreenState createState() => _ThreePhaseCalculatorScreenState();
+  ThreePhaseCalculatorScreenState createState() => ThreePhaseCalculatorScreenState();
 }
 
-class _ThreePhaseCalculatorScreenState extends State<ThreePhaseCalculatorScreen> {
+class ThreePhaseCalculatorScreenState extends State<ThreePhaseCalculatorScreen> {
   // Form key for validation
   final _formKey = GlobalKey<FormState>();
   
@@ -263,7 +263,7 @@ class _ThreePhaseCalculatorScreenState extends State<ThreePhaseCalculatorScreen>
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -309,7 +309,7 @@ class _ThreePhaseCalculatorScreenState extends State<ThreePhaseCalculatorScreen>
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Theme.of(context).primaryColor.withOpacity(0.3),
+                              color: Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
                             ),
                           ),
                           child: Column(
@@ -363,13 +363,13 @@ class ResultRow extends StatelessWidget {
   final Color color;
 
   const ResultRow({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.unit,
     required this.icon,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -377,9 +377,9 @@ class ResultRow extends StatelessWidget {
     
     // Format large numbers for better readability
     if (value >= 1000000) {
-      displayValue = (value / 1000000).toStringAsFixed(2) + ' M';
+      displayValue = '${(value / 1000000).toStringAsFixed(2)} M';
     } else if (value >= 1000) {
-      displayValue = (value / 1000).toStringAsFixed(2) + ' k';
+      displayValue = '${(value / 1000).toStringAsFixed(2)} k';
     }
     
     return Padding(
@@ -387,7 +387,7 @@ class ResultRow extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: color.withOpacity(0.2),
+            backgroundColor: color.withAlpha((0.2 * 255).round()),
             child: Icon(
               icon,
               color: color,

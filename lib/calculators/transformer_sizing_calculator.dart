@@ -6,11 +6,11 @@ class TransformerSizingCalculatorScreen extends StatefulWidget {
   const TransformerSizingCalculatorScreen({super.key});
 
   @override
-  _TransformerSizingCalculatorScreenState createState() => 
-      _TransformerSizingCalculatorScreenState();
+  TransformerSizingCalculatorScreenState createState() => 
+      TransformerSizingCalculatorScreenState();
 }
 
-class _TransformerSizingCalculatorScreenState 
+class TransformerSizingCalculatorScreenState 
     extends State<TransformerSizingCalculatorScreen> {
   // Form key for validation
   final _formKey = GlobalKey<FormState>();
@@ -619,12 +619,12 @@ class ResultItem extends StatelessWidget {
   final Color iconColor;
 
   const ResultItem({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.icon,
     required this.iconColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -661,11 +661,11 @@ class BenefitItem extends StatelessWidget {
   final Color iconColor;
 
   const BenefitItem({
-    Key? key,
+    super.key,
     required this.text,
     required this.icon,
     required this.iconColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

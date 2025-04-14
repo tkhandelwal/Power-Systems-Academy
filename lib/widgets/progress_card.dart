@@ -5,10 +5,10 @@ class ProgressCard extends StatelessWidget {
   final VoidCallback onViewProgress;
 
   const ProgressCard({
-    Key? key,
+    super.key,
     required this.progressPercentage,
     required this.onViewProgress,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,11 +49,11 @@ class ProgressCard extends StatelessWidget {
             SizedBox(height: 12),
             ElevatedButton(
               onPressed: onViewProgress,
-              child: Text('View Detailed Progress'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 minimumSize: Size(double.infinity, 36),
               ),
+              child: Text('View Detailed Progress'),
             ),
           ],
         ),

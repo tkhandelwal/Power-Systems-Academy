@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +61,8 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class ProfileHeader extends StatelessWidget {
+  const ProfileHeader({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -105,7 +109,7 @@ class ProfileHeader extends StatelessWidget {
                     children: [
                       Chip(
                         label: Text('PE Candidate'),
-                        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                        backgroundColor: Theme.of(context).primaryColor.withAlpha((0.2 * 255).round()),
                         labelStyle: TextStyle(
                           color: Theme.of(context).primaryColor,
                         ),
@@ -113,7 +117,7 @@ class ProfileHeader extends StatelessWidget {
                       SizedBox(width: 8),
                       Chip(
                         label: Text('Active'),
-                        backgroundColor: Colors.green.withOpacity(0.2),
+                        backgroundColor: Colors.green.withAlpha((0.2 * 255).round()),
                         labelStyle: TextStyle(
                           color: Colors.green,
                         ),
@@ -158,6 +162,8 @@ class StudyProgressCard extends StatelessWidget {
       'color': Colors.red,
     },
   ];
+
+  StudyProgressCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -206,10 +212,10 @@ class StudyProgressCard extends StatelessWidget {
                 onPressed: () {
                   // View detailed analytics
                 },
-                child: Text('View Detailed Analytics'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                 ),
+                child: Text('View Detailed Analytics'),
               ),
             ),
           ],
@@ -225,11 +231,11 @@ class TopicProgressBar extends StatelessWidget {
   final Color color;
 
   const TopicProgressBar({
-    Key? key,
+    super.key,
     required this.topic,
     required this.progress,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -259,6 +265,8 @@ class TopicProgressBar extends StatelessWidget {
 }
 
 class ExamPreparationCard extends StatelessWidget {
+  const ExamPreparationCard({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -387,6 +395,8 @@ class StudyHistoryCard extends StatelessWidget {
     },
   ];
 
+  StudyHistoryCard({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -431,9 +441,9 @@ class StudyActivityTile extends StatelessWidget {
   final Map<String, dynamic> activity;
 
   const StudyActivityTile({
-    Key? key,
+    super.key,
     required this.activity,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

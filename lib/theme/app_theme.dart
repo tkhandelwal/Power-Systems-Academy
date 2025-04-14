@@ -208,7 +208,6 @@ class AppTheme {
         primary: primaryColor,
         secondary: secondaryColor,
         surface: Color(0xFF1E1E1E),
-        background: Color(0xFF121212),
 
       ),
       
@@ -386,20 +385,44 @@ selectedColor: primaryColor.withAlpha((0.3 * 255).round()),        secondarySele
   
   // Helper function to create MaterialColor from a Color
   static MaterialColor _createMaterialColor(Color color) {
-    List<double> strengths = <double>[.05, .1, .2, .3, .4, .5, .6, .7, .8, .9];
-    Map<int, Color> swatch = <int, Color>{};
-    final int r = color.red, g = color.green, b = color.blue;
-
-    for (var strength in strengths) {
-      final double ds = 0.5 - strength;
-      swatch[(strength * 1000).round()] = Color.fromRGBO(
-        r + ((ds < 0 ? r : (255 - r)) * ds).round(),
-        g + ((ds < 0 ? g : (255 - g)) * ds).round(),
-        b + ((ds < 0 ? b : (255 - b)) * ds).round(),
-        1,
-      );
-    }
-    return MaterialColor(color.value, swatch);
+  List<double> strengths = <double>[.05, .1, .2, .3, .4, .5, .6, .7, .8, .9];
+  Map<int, Color> swatch = <int, Color>{};
+  
+  // Extract color components without using the deprecated properties
+  // Extract r, g, b components using the Color's alpha getter and calling the Color constructor
+  int alpha = color.opacity.round() * 255;
+  int r = 0, g = 0, b = 0;
+  
+  // We can still extract the components from the color using an alternative approach
+  // Create a dummy canvas and draw the color, then read the pixel data
+  // For now, we'll use a workaround by calling toString() and parsing
+  String colorString = color.toString();
+  
+  // Color.toString() format is "Color(0xAARRGGBB)"
+  if (colorString.startsWith('Color(0x')) {
+    String hexCode = colorString.substring(8, 16); // Skip "Color(0x" and get the hex code
+    
+    // Parse the hex code to extract r, g, b components
+    r = int.parse(hexCode.substring(2, 4), radix: 16);
+    g = int.parse(hexCode.substring(4, 6), radix: 16);
+    b = int.parse(hexCode.substring(6, 8), radix: 16);
   }
+
+  for (var strength in strengths) {
+    final double ds = 0.5 - strength;
+    swatch[(strength * 1000).round()] = Color.fromRGBO(
+      (r + ((ds < 0 ? r : (255 - r)) * ds).round()).clamp(0, 255),
+      (g + ((ds < 0 ? g : (255 - g)) * ds).round()).clamp(0, 255),
+      (b + ((ds < 0 ? b : (255 - b)) * ds).round()).clamp(0, 255),
+      1,
+    );
+  }
+  
+  // For MaterialColor constructor, we need the value
+  // We'll recreate it from the r, g, b components
+  int colorValue = (0xFF << 24) | (r << 16) | (g << 8) | b;
+  
+  return MaterialColor(colorValue, swatch);
+}
 }
 

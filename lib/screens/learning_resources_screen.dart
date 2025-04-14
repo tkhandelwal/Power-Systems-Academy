@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class LearningResourcesScreen extends StatelessWidget {
+  const LearningResourcesScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -101,6 +103,8 @@ class VideosTab extends StatelessWidget {
     },
   ];
 
+  VideosTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -149,13 +153,13 @@ class VideoCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const VideoCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.duration,
     required this.instructor,
     required this.watched,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -304,6 +308,8 @@ class ReferencesTab extends StatelessWidget {
     },
   ];
 
+  ReferencesTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -391,6 +397,8 @@ class FormulasTab extends StatelessWidget {
     },
   ];
 
+  FormulasTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -459,9 +467,9 @@ class FormulaCard extends StatelessWidget {
   final String formula;
 
   const FormulaCard({
-    Key? key,
+    super.key,
     required this.formula,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

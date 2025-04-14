@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class StudyMaterialsScreen extends StatelessWidget {
+  const StudyMaterialsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -87,6 +89,8 @@ class TopicsTab extends StatelessWidget {
     },
   ];
 
+  TopicsTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -155,20 +159,20 @@ class TopicsTab extends StatelessWidget {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {},
-                            child: Text('Start Studying'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).primaryColor,
                             ),
+                            child: Text('Start Studying'),
                           ),
                         ),
                         SizedBox(width: 8),
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () {},
-                            child: Text('Practice Questions'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Theme.of(context).primaryColor,
                             ),
+                            child: Text('Practice Questions'),
                           ),
                         ),
                       ],
@@ -185,6 +189,8 @@ class TopicsTab extends StatelessWidget {
 }
 
 class PracticeQuestionsTab extends StatelessWidget {
+  const PracticeQuestionsTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -226,11 +232,11 @@ class PracticeQuestionsTab extends StatelessWidget {
                   SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {},
-                    child: Text('Start Quiz'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       minimumSize: Size(double.infinity, 45),
                     ),
+                    child: Text('Start Quiz'),
                   ),
                 ],
               ),
@@ -307,13 +313,13 @@ class QuestionBankCard extends StatelessWidget {
   final bool isLocked;
 
   const QuestionBankCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.questionCount,
     required this.completedCount,
     required this.difficulty,
     this.isLocked = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -382,19 +388,19 @@ class QuestionBankCard extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: isLocked ? null : () {},
-                    child: Text('Practice'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                     ),
+                    child: Text('Practice'),
                   ),
                 ),
                 SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: isLocked ? null : () {},
-                  child: Text('Review'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).primaryColor,
                   ),
+                  child: Text('Review'),
                 ),
               ],
             ),
@@ -438,6 +444,8 @@ class FlashcardsTab extends StatelessWidget {
       'color': Colors.red,
     },
   ];
+
+  FlashcardsTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -491,13 +499,13 @@ class FlashcardDeckCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const FlashcardDeckCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.cardCount,
     required this.masteredCount,
     required this.color,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -519,7 +527,7 @@ class FlashcardDeckCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withAlpha((0.2 * 255).round()),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -562,11 +570,11 @@ class FlashcardDeckCard extends StatelessWidget {
               Spacer(),
               ElevatedButton(
                 onPressed: onTap,
-                child: Text('Study Now'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: color,
                   minimumSize: Size(double.infinity, 40),
                 ),
+                child: Text('Study Now'),
               ),
             ],
           ),
