@@ -4,6 +4,7 @@ import 'package:powersystemsacademy/calculators/three_phase_power_calculator.dar
 import 'package:powersystemsacademy/calculators/power_factor_calculator.dart';
 import 'package:powersystemsacademy/calculators/transformer_sizing_calculator.dart';
 import 'package:powersystemsacademy/calculators/voltage_drop_calculator.dart';
+import 'package:powersystemsacademy/calculators/short_circuit_calculator.dart'; // Import the new calculator
 
 // Updated CalculatorsScreen to avoid deprecated color methods
 class CalculatorsScreen extends StatelessWidget {
@@ -27,7 +28,7 @@ class CalculatorsScreen extends StatelessWidget {
               {'name': 'Power Factor Correction', 'implemented': true},
               {'name': 'Transformer Sizing', 'implemented': true},
               {'name': 'Voltage Drop', 'implemented': true},
-              {'name': 'Fault Current Analysis', 'implemented': false},
+              {'name': 'Short Circuit Analysis', 'implemented': true},
             ],
             onCategoryTap: () {
               // Navigate to power systems calculators list
@@ -209,6 +210,13 @@ class CalculatorCategoryCard extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => VoltageDropCalculatorScreen(),
+                          ),
+                        );
+                        } else if (calculator['name'] == 'Short Circuit Analysis' && calculator['implemented']) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ShortCircuitCalculatorScreen(),
                           ),
                         );
                           } else if (!calculator['implemented']) {
