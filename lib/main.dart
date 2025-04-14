@@ -53,26 +53,62 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    _isDarkMode = prefs.getBool('isDarkMode') ?? false;
-    _primaryColor = Color(prefs.getInt('primaryColor') ?? AppTheme.primaryIndigo.hashCode);
-    _accentColor = Color(prefs.getInt('accentColor') ?? AppTheme.accentAmber.hashCode);
-    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _isDarkMode = prefs.getBool('isDarkMode') ?? false;
+      _primaryColor = _getColorFromPrefs(prefs, 'primaryColor', AppTheme.primaryIndigo);
+      _accentColor = _getColorFromPrefs(prefs, 'accentColor', AppTheme.accentAmber);
+      notifyListeners();
+    } catch (e) {
+      // Fallback to default theme if loading fails
+      _isDarkMode = false;
+      _primaryColor = AppTheme.primaryIndigo;
+      _accentColor = AppTheme.accentAmber;
+      notifyListeners();
+    }
+  }
+
+  Color _getColorFromPrefs(SharedPreferences prefs, String key, Color defaultColor) {
+    try {
+      final colorValue = prefs.getInt(key);
+      return colorValue != null ? Color(colorValue) : defaultColor;
+    } catch (e) {
+      return defaultColor;
+    }
   }
 
   Future<void> _savePreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isDarkMode', _isDarkMode);
-    prefs.setInt('primaryColor', _primaryColor.hashCode);
-    prefs.setInt('accentColor', _accentColor.hashCode);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setBool('isDarkMode', _isDarkMode);
+      prefs.setInt('primaryColor', _primaryColor.value);
+      prefs.setInt('accentColor', _accentColor.value);
+    } catch (e) {
+      // Handle the error (e.g., log it or show a message)
+      debugPrint('Failed to save preferences: $e');
+    }
+  }
+
+  // Helper method to get theme name for display purposes
+  String getThemeName() {
+    String modeName = _isDarkMode ? 'Dark' : 'Light';
+    
+    if (_primaryColor == AppTheme.primaryIndigo) return '$modeName Blue';
+    if (_primaryColor == AppTheme.primaryBlue) return '$modeName Light Blue';
+    if (_primaryColor == AppTheme.primaryTeal) return '$modeName Teal';
+    if (_primaryColor == AppTheme.primaryGreen) return '$modeName Green';
+    if (_primaryColor == AppTheme.primaryPurple) return '$modeName Purple';
+    
+    return '$modeName Custom';
   }
 }
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
-      child: PowerEngineeringPrepApp(),
+      child: const PowerEngineeringPrepApp(),
     ),
   );
 }

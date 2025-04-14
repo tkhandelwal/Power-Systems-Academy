@@ -1,5 +1,7 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:powersystemsacademy/main.dart';
 import 'package:powersystemsacademy/widgets/countdown_card.dart';
 import 'package:powersystemsacademy/widgets/progress_card.dart';
 import 'package:powersystemsacademy/widgets/feature_card.dart';
@@ -78,8 +80,12 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    final primaryColor = themeProvider.primaryColor;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -88,12 +94,15 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             expandedHeight: 180.0,
             floating: false,
             pinned: true,
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: primaryColor,
             actions: [
               IconButton(
-                icon: Icon(Icons.notifications, color: Colors.white),
+                icon: Icon(
+                  isDarkMode ? Icons.light_mode : Icons.dark_mode, 
+                  color: Colors.white
+                ),
                 onPressed: () {
-                  // Show notifications
+                  themeProvider.toggleTheme();
                 },
               ),
               IconButton(
@@ -121,18 +130,10 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Theme.of(context).primaryColor.withAlpha((0.8 * 255).round()),
-                          Theme.of(context).primaryColor,
+                          primaryColor.withOpacity(0.8),
+                          primaryColor,
                         ],
                       ),
-                    ),
-                  ),
-                  // Circuit pattern overlay
-                  Opacity(
-                    opacity: 0.1,
-                    child: Image.network(
-                      'https://pixabay.com/photos/power-distribution-electricity-1367130/',
-                      fit: BoxFit.cover,
                     ),
                   ),
                   // Bottom gradient shadow for better text visibility
@@ -148,7 +149,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withAlpha((0.3 * 255).round()),
+                            Colors.black.withOpacity(0.3),
                           ],
                         ),
                       ),
@@ -363,8 +364,8 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       drawer: buildDrawer(context),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey[600],
+        selectedItemColor: primaryColor,
+        unselectedItemColor: isDarkMode ? Colors.grey[400] : Colors.grey[600],
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
