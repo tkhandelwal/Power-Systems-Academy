@@ -117,12 +117,13 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
               double impedance = double.parse(_lineImpedanceControllers[i][j].text);
               if (impedance > 0) {
                 // Convert impedance to admittance (Y = 1/Z)
-                Complex admittance = Complex(1, 0) / Complex(0, impedance);
-                Y[i][j] = -admittance; // Off-diagonal elements
+                // For reactance values, Z = jX, so Y = -j/X
+                Complex admittance = Complex(0, -1/impedance);
+                Y[i][j] = admittance; // Off-diagonal elements
                 
                 // Add to diagonal elements
-                Y[i][i] = Y[i][i] + admittance;
-                Y[j][j] = Y[j][j] + admittance;
+                Y[i][i] = Y[i][i] - admittance; // Negative of off-diagonal
+                Y[j][j] = Y[j][j] - admittance; // Negative of off-diagonal
               }
             }
           }
@@ -153,9 +154,9 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
               Complex Vj = Complex.polar(calculatedV[j], calculatedTheta[j]);
               Complex Yij = Y[i][j];
               
-              Complex Sij = Vi * (Yij * Vj).conjugate();
-              calculatedP[i] += Sij.real;
-              calculatedQ[i] += Sij.imaginary;
+              Complex S = Vi * (Yij * Vj).conjugate();
+              calculatedP[i] += S.real;
+              calculatedQ[i] += S.imaginary;
             }
             
             // Add power mismatches for PV and PQ buses
@@ -227,13 +228,19 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
             if (impedance > 0) {
               Complex Vi = Complex.polar(calculatedV[i], calculatedTheta[i]);
               Complex Vj = Complex.polar(calculatedV[j], calculatedTheta[j]);
-              Complex Yij = Y[i][j];
               
+              // Calculate current: Iij = (Vi - Vj) / (jX)
               Complex Iij = (Vi - Vj) / Complex(0, impedance);
+              
+              // Calculate power at bus i towards bus j: Sij = Vi * conj(Iij)
               Complex Sij = Vi * Iij.conjugate();
+              
+              // Calculate power at bus j towards bus i: Sji = Vj * conj(-Iij)
               Complex Sji = Vj * (-Iij).conjugate();
               
-              double losses = (Sij.real + Sji.real).abs();
+              // Calculate losses: losses = Sij + Sji
+              double activeLosses = (Sij.real + Sji.real).abs();
+              double reactiveLosses = (Sij.imaginary + Sji.imaginary).abs();
               
               _lineResults.add({
                 'from': i + 1,
@@ -241,7 +248,8 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
                 'activePower': Sij.real.toStringAsFixed(4),
                 'reactivePower': Sij.imaginary.toStringAsFixed(4),
                 'current': Iij.magnitude.toStringAsFixed(4),
-                'losses': losses.toStringAsFixed(4),
+                'activeLosses': activeLosses.toStringAsFixed(4),
+                'reactiveLosses': reactiveLosses.toStringAsFixed(4),
               });
             }
           }
@@ -315,15 +323,18 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
               double Vk = V[k];
               double thetak = theta[k];
               double thetaik = theta[i] - thetak;
-              sum += V[i] * Vk * (Yik.real * sin(thetaik) - Yik.imaginary * cos(thetaik));
+              sum += V[i] * Vk * Yik.magnitude * sin(thetaik - Yik.angle);
             }
           }
-          J[row][col] = -sum;
+          J[row][col] = sum;
+          
+          // Add diagonal elements of G*V²
+          J[row][col] += V[i] * V[i] * Y[i][i].real;
         } else {
           // Off-diagonal element for dP_i/dTheta_j
           Complex Yij = Y[i][j];
           double thetaij = theta[i] - theta[j];
-          J[row][col] = V[i] * V[j] * (Yij.real * sin(thetaij) - Yij.imaginary * cos(thetaij));
+          J[row][col] = -V[i] * V[j] * Yij.magnitude * sin(thetaij - Yij.angle);
         }
         
         col++;
@@ -338,7 +349,7 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
                 Complex Yik = Y[i][k];
                 double Vk = V[k];
                 double thetaik = theta[i] - theta[k];
-                sum += Vk * (Yik.real * cos(thetaik) + Yik.imaginary * sin(thetaik));
+                sum += Vk * Yik.magnitude * cos(thetaik - Yik.angle);
               }
             }
             J[row][col] = 2 * V[i] * Y[i][i].real + sum;
@@ -346,7 +357,7 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
             // Off-diagonal element for dP_i/dV_j
             Complex Yij = Y[i][j];
             double thetaij = theta[i] - theta[j];
-            J[row][col] = V[i] * (Yij.real * cos(thetaij) + Yij.imaginary * sin(thetaij));
+            J[row][col] = V[i] * Yij.magnitude * cos(thetaij - Yij.angle);
           }
           col++;
         }
@@ -371,15 +382,18 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
                 Complex Yik = Y[i][k];
                 double Vk = V[k];
                 double thetaik = theta[i] - theta[k];
-                sum += V[i] * Vk * (Yik.real * cos(thetaik) + Yik.imaginary * sin(thetaik));
+                sum += V[i] * Vk * Yik.magnitude * cos(thetaik - Yik.angle);
               }
             }
-            J[row][col] = sum;
+            J[row][col] = -sum;
+            
+            // Add diagonal elements of -B*V²
+            J[row][col] += V[i] * V[i] * Y[i][i].imaginary;
           } else {
             // Off-diagonal element for dQ_i/dTheta_j
             Complex Yij = Y[i][j];
             double thetaij = theta[i] - theta[j];
-            J[row][col] = -V[i] * V[j] * (Yij.real * cos(thetaij) + Yij.imaginary * sin(thetaij));
+            J[row][col] = -V[i] * V[j] * Yij.magnitude * cos(thetaij - Yij.angle);
           }
           
           col++;
@@ -394,7 +408,7 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
                   Complex Yik = Y[i][k];
                   double Vk = V[k];
                   double thetaik = theta[i] - theta[k];
-                  sum += Vk * (Yik.real * sin(thetaik) - Yik.imaginary * cos(thetaik));
+                  sum += Vk * Yik.magnitude * sin(thetaik - Yik.angle);
                 }
               }
               J[row][col] = -2 * V[i] * Y[i][i].imaginary + sum;
@@ -402,7 +416,7 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
               // Off-diagonal element for dQ_i/dV_j
               Complex Yij = Y[i][j];
               double thetaij = theta[i] - theta[j];
-              J[row][col] = V[i] * (Yij.real * sin(thetaij) - Yij.imaginary * cos(thetaij));
+              J[row][col] = V[i] * Yij.magnitude * sin(thetaij - Yij.angle);
             }
             col++;
           }
@@ -428,7 +442,7 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
     
     // Gaussian elimination with partial pivoting
     for (int i = 0; i < n; i++) {
-      // Find pivot (largest element in column i)
+      // Find pivot (largest element in column i below the current row)
       int maxRow = i;
       double maxVal = aug[i][i].abs();
       
@@ -446,17 +460,19 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
         aug[maxRow] = temp;
       }
       
-      // Check for singular matrix
+      // Check for singular matrix (near-zero pivot)
       if (aug[i][i].abs() < 1e-10) {
         // Add a small value to diagonal to avoid division by zero
-        aug[i][i] = 1e-10;
+        aug[i][i] = aug[i][i] < 0 ? -1e-10 : 1e-10;
       }
       
       // Eliminate below
       for (int k = i + 1; k < n; k++) {
         double factor = aug[k][i] / aug[i][i];
         
-        for (int j = i; j <= n; j++) {
+        aug[k][i] = 0.0; // Explicitly set to zero to avoid floating-point errors
+        
+        for (int j = i + 1; j <= n; j++) {
           aug[k][j] -= factor * aug[i][j];
         }
       }
@@ -472,6 +488,11 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
       }
       
       x[i] /= aug[i][i];
+      
+      // Limit correction values to prevent oscillations
+      if (x[i].abs() > 0.5) {
+        x[i] = x[i] > 0 ? 0.5 : -0.5;
+      }
     }
     
     return x;
@@ -698,10 +719,18 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Line Impedance Data (pu)',
+                        'Line Reactance Data (pu)',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Enter line reactance X values (not impedance Z). Admittance Y = 1/jX will be calculated automatically.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
                         ),
                       ),
                       SizedBox(height: 16),
@@ -831,7 +860,7 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
                   fontSize: 16,
                 ),
               ),
-DropdownButton<String>(
+              DropdownButton<String>(
                 value: bus['type'],
                 items: _busTypes.map((String type) {
                   return DropdownMenuItem<String>(
@@ -1140,7 +1169,8 @@ DropdownButton<String>(
                   DataColumn(label: Text('P Flow (pu)')),
                   DataColumn(label: Text('Q Flow (pu)')),
                   DataColumn(label: Text('Current (pu)')),
-                  DataColumn(label: Text('Losses (pu)')),
+                  DataColumn(label: Text('P Loss (pu)')),
+                  DataColumn(label: Text('Q Loss (pu)')),
                 ],
                 rows: _lineResults.map((line) {
                   return DataRow(
@@ -1150,7 +1180,8 @@ DropdownButton<String>(
                       DataCell(Text('${line['activePower']}')),
                       DataCell(Text('${line['reactivePower']}')),
                       DataCell(Text('${line['current']}')),
-                      DataCell(Text('${line['losses']}')),
+                      DataCell(Text('${line['activeLosses']}')),
+                      DataCell(Text('${line['reactiveLosses']}')),
                     ],
                   );
                 }).toList(),
