@@ -19,23 +19,27 @@ class Complex {
   
   Complex get conjugate => Complex(real, -imaginary);
   
-  Complex operator +(Complex other) {
+  Complex add(Complex other) {
     return Complex(real + other.real, imaginary + other.imaginary);
   }
   
-  Complex operator -(Complex other) {
+  Complex subtract(Complex other) {
     return Complex(real - other.real, imaginary - other.imaginary);
   }
   
-  Complex operator *(Complex other) {
+  Complex multiply(Complex other) {
     return Complex(
       real * other.real - imaginary * other.imaginary,
       real * other.imaginary + imaginary * other.real,
     );
   }
   
-  Complex operator /(Complex other) {
+  Complex divide(Complex other) {
     double denominator = other.real * other.real + other.imaginary * other.imaginary;
+    if (denominator.abs() < 1e-10) {
+      // Avoid division by near-zero values
+      throw Exception('Division by near-zero complex number');
+    }
     return Complex(
       (real * other.real + imaginary * other.imaginary) / denominator,
       (imaginary * other.real - real * other.imaginary) / denominator,
@@ -44,6 +48,26 @@ class Complex {
   
   double abs() {
     return magnitude;
+  }
+  
+  Complex operator -() {
+    return Complex(-real, -imaginary);
+  }
+  
+  Complex operator +(Complex other) {
+    return add(other);
+  }
+  
+  Complex operator -(Complex other) {
+    return subtract(other);
+  }
+  
+  Complex operator *(Complex other) {
+    return multiply(other);
+  }
+  
+  Complex operator /(Complex other) {
+    return divide(other);
   }
   
   @override
