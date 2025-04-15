@@ -409,208 +409,211 @@ class NECReferenceScreenState extends State<NECReferenceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: 'Search NEC articles...',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white70),
-                ),
-                style: TextStyle(color: Colors.white),
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: _isSearching
+              ? TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Search NEC articles...',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(color: Colors.white70),
+                  ),
+                  style: TextStyle(color: Colors.white),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                      _filterArticles();
+                    });
+                  },
+                )
+              : Text('NEC Reference Guide'),
+          actions: [
+            IconButton(
+              icon: Icon(_isSearching ? Icons.cancel : Icons.search),
+              onPressed: () {
+                setState(() {
+                  if (_isSearching) {
+                    _isSearching = false;
+                    _searchQuery = '';
+                    _searchController.clear();
                     _filterArticles();
-                  });
-                },
-              )
-            : Text('NEC Reference Guide'),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.cancel : Icons.search),
-            onPressed: () {
+                  } else {
+                    _isSearching = true;
+                  }
+                });
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.info_outline),
+              onPressed: () {
+                _showInfoDialog(context);
+              },
+            ),
+          ],
+          bottom: TabBar(
+            onTap: (index) {
               setState(() {
-                if (_isSearching) {
-                  _isSearching = false;
-                  _searchQuery = '';
-                  _searchController.clear();
-                  _filterArticles();
-                } else {
-                  _isSearching = true;
-                }
+                _currentTabIndex = index;
               });
             },
-          ),
-          IconButton(
-            icon: Icon(Icons.info_outline),
-            onPressed: () {
-              _showInfoDialog(context);
-            },
-          ),
-        ],
-        bottom: TabBar(
-          onTap: (index) {
-            setState(() {
-              _currentTabIndex = index;
-            });
-          },
-          tabs: [
-            Tab(text: 'Browse'),
-            Tab(text: 'Bookmarks'),
-            Tab(text: 'PE Exam Notes'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        children: [
-          // Tab 1: Browse Articles
-          Column(
-            children: [
-              // Filter controls
-              Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Filter by:',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<int>(
-                            value: _selectedChapterIndex,
-                            decoration: InputDecoration(
-                              labelText: 'Chapter',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                            ),
-                            items: List.generate(_chapterTitles.length, (index) {
-                              return DropdownMenuItem<int>(
-                                value: index == 0 ? -1 : index,
-                                child: Text(_chapterTitles[index]),
-                              );
-                            }),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedChapterIndex = value!;
-                                _filterArticles();
-                              });
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: _showKeyArticles,
-                              onChanged: (value) {
-                                setState(() {
-                                  _showKeyArticles = value!;
-                                  _filterArticles();
-                                });
-                              },
-                            ),
-                            Text('Key Articles Only'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              
-              // Article list
-              Expanded(
-                child: _filteredArticles.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.search_off,
-                              size: 64,
-                              color: Colors.grey,
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'No articles found',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Try adjusting your search or filters',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: _filteredArticles.length,
-                        itemBuilder: (context, index) {
-                          final article = _filteredArticles[index];
-                          return _buildArticleItem(article);
-                        },
-                      ),
-              ),
+            tabs: [
+              Tab(text: 'Browse'),
+              Tab(text: 'Bookmarks'),
+              Tab(text: 'PE Exam Notes'),
             ],
           ),
-          
-          // Tab 2: Bookmarked Articles
-          _bookmarkedArticles.isEmpty
-              ? Center(
+        ),
+        body: TabBarView(
+          children: [
+            // Tab 1: Browse Articles
+            Column(
+              children: [
+                // Filter controls
+                Padding(
+                  padding: EdgeInsets.all(16.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.bookmark_border,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      SizedBox(height: 16),
                       Text(
-                        'No bookmarked articles yet',
+                        'Filter by:',
                         style: TextStyle(
-                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       SizedBox(height: 8),
-                      Text(
-                        'Tap the bookmark icon on any article to save it here',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<int>(
+                              value: _selectedChapterIndex,
+                              decoration: InputDecoration(
+                                labelText: 'Chapter',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                              ),
+                              items: List.generate(_chapterTitles.length, (index) {
+                                return DropdownMenuItem<int>(
+                                  value: index == 0 ? -1 : index,
+                                  child: Text(_chapterTitles[index]),
+                                );
+                              }),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedChapterIndex = value!;
+                                  _filterArticles();
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: _showKeyArticles,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _showKeyArticles = value!;
+                                    _filterArticles();
+                                  });
+                                },
+                              ),
+                              Text('Key Articles Only'),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                )
-              : ListView.builder(
-                  itemCount: _bookmarkedArticles.length,
-                  itemBuilder: (context, index) {
-                    final article = _bookmarkedArticles[index];
-                    return _buildArticleItem(article);
-                  },
                 ),
-          
-          // Tab 3: PE Exam Notes
-          _buildPEExamNotesTab(),
-        ],
+                
+                // Article list
+                Expanded(
+                  child: _filteredArticles.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'No articles found',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Try adjusting your search or filters',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _filteredArticles.length,
+                          itemBuilder: (context, index) {
+                            final article = _filteredArticles[index];
+                            return _buildArticleItem(article);
+                          },
+                        ),
+                ),
+              ],
+            ),
+            
+            // Tab 2: Bookmarked Articles
+            _bookmarkedArticles.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.bookmark_border,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'No bookmarked articles yet',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Tap the bookmark icon on any article to save it here',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _bookmarkedArticles.length,
+                    itemBuilder: (context, index) {
+                      final article = _bookmarkedArticles[index];
+                      return _buildArticleItem(article);
+                    },
+                  ),
+            
+            // Tab 3: PE Exam Notes
+            _buildPEExamNotesTab(),
+          ],
+        ),
       ),
     );
   }
@@ -826,6 +829,7 @@ class NECReferenceScreenState extends State<NECReferenceScreen> {
                               fontSize: 18,
                             ),
                           ),
+                        
                           Text(
                             'Key articles and concepts frequently tested',
                             style: TextStyle(
@@ -1139,124 +1143,4 @@ class NECContentSection {
     required this.title,
     required this.text,
   });
-}// lib/screens/nec_reference_screen.dart
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-class NECReferenceScreen extends StatefulWidget {
-  const NECReferenceScreen({super.key});
-
-  @override
-  NECReferenceScreenState createState() => NECReferenceScreenState();
 }
-
-class NECReferenceScreenState extends State<NECReferenceScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-  bool _showKeyArticles = true;
-  final List<NECArticle> _allArticles = [];
-  List<NECArticle> _filteredArticles = [];
-  List<NECArticle> _bookmarkedArticles = [];
-  int _selectedChapterIndex = -1; // -1 means "All Chapters"
-  List<String> _chapterTitles = [];
-  bool _isSearching = false;
-  
-  // Tabs
-  int _currentTabIndex = 0;
-  
-  @override
-  void initState() {
-    super.initState();
-    _initializeNECData();
-    _filteredArticles = _getKeyArticles();
-  }
-  
-  void _initializeNECData() {
-    // In a real app, this would be loaded from a database or API
-    // This is a simplified representation of NEC for demo purposes
-    
-    // Create chapters
-    _chapterTitles = [
-      'All Chapters',
-      '1: General',
-      '2: Wiring and Protection',
-      '3: Wiring Methods and Materials',
-      '4: Equipment for General Use',
-      '5: Special Occupancies',
-      '6: Special Equipment',
-      '7: Special Conditions',
-      '8: Communications Systems',
-      '9: Tables',
-    ];
-    
-    // Create articles for different chapters
-    _allArticles.addAll([
-      // Chapter 1: General
-      NECArticle(
-        number: '100',
-        title: 'Definitions',
-        chapter: 1,
-        summary: 'Contains definitions of terms used throughout the code.',
-        isKeyArticle: true,
-        content: [
-          NECContentSection(
-            title: '100.1 Scope',
-            text: 'This article contains definitions essential to the proper application of this Code. It does not include commonly defined general terms or commonly defined technical terms from related codes and standards.',
-          ),
-          NECContentSection(
-            title: '100.2 Definitions',
-            text: 'The definitions in this section apply to the entire code and include terms like Accessible, Ampacity, Branch Circuit, Circuit Breaker, Conductor, etc.',
-          ),
-        ],
-        peExamNotes: 'Critical for understanding terminology used in NEC. Knowing definitions is essential for the PE exam as they set the foundation for code interpretation.',
-      ),
-      NECArticle(
-        number: '110',
-        title: 'Requirements for Electrical Installations',
-        chapter: 1,
-        summary: 'General requirements for electrical installations including approvals, markings, conductors, and connections.',
-        isKeyArticle: true,
-        content: [
-          NECContentSection(
-            title: '110.1 Scope',
-            text: 'This article covers general requirements for the examination and approval, installation and use, access to and spaces about electrical conductors and equipment.',
-          ),
-          NECContentSection(
-            title: '110.3 Examination, Identification, Installation, Use, and Listing',
-            text: 'Requires that electrical equipment be listed for the purpose when available, suitable for installation according to the code, and installed according to any instructions included in the listing or labeling.',
-          ),
-          NECContentSection(
-            title: '110.12 Mechanical Execution of Work',
-            text: 'Electrical equipment shall be installed in a neat and workmanlike manner.',
-          ),
-          NECContentSection(
-            title: '110.14 Electrical Connections',
-            text: 'Covers requirements for electrical connections, including provisions for aluminum conductors and temperature limitations.',
-          ),
-        ],
-        peExamNotes: 'Pay special attention to 110.14 for temperature ratings of conductors and terminal ratings. A frequent exam topic is determining the ampacity of conductors based on termination temperature limitations.',
-      ),
-      
-      // Chapter 2: Wiring and Protection
-      NECArticle(
-        number: '210',
-        title: 'Branch Circuits',
-        chapter: 2,
-        summary: 'Requirements for branch circuits including classifications, required outlets, and loads.',
-        isKeyArticle: true,
-        content: [
-          NECContentSection(
-            title: '210.1 Scope',
-            text: 'This article covers branch circuits except for branch circuits that supply only motor loads, which are covered in Article 430.',
-          ),
-          NECContentSection(
-            title: '210.3 Rating',
-            text: 'Branch circuits shall be rated in accordance with the maximum permitted ampere rating or setting of the overcurrent device, with standard ratings of 15, 20, 30, 40, and 50 amperes.',
-          ),
-          NECContentSection(
-            title: '210.19 Conductors — Minimum Ampacity and Size',
-            text: 'Branch-circuit conductors shall have an ampacity not less than the maximum load to be served and not less than specified in various parts of this section.',
-          ),
-          NECContentSection(
-            title: '210.20 Overcurrent Protection',
-            text: 'Branch-circuit conductors and equipment shall be 
