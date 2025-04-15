@@ -15,7 +15,7 @@ class NECReferenceScreenState extends State<NECReferenceScreen> {
   bool _showKeyArticles = true;
   final List<NECArticle> _allArticles = [];
   List<NECArticle> _filteredArticles = [];
-  List<NECArticle> _bookmarkedArticles = [];
+  final List<NECArticle> _bookmarkedArticles = [];
   int _selectedChapterIndex = -1; // -1 means "All Chapters"
   List<String> _chapterTitles = [];
   bool _isSearching = false;

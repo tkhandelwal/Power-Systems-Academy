@@ -31,6 +31,19 @@ class PracticeQuestionsScreenState extends State<PracticeQuestionsScreen> {
   bool _quizMode = false;
   int _totalQuizQuestions = 10;
   
+
+  Color _getDifficultyColor(String difficulty) {
+  switch (difficulty) {
+    case 'Basic':
+      return Colors.green;
+    case 'Intermediate':
+      return Colors.orange;
+    case 'Advanced':
+      return Colors.red;
+    default:
+      return Colors.blue;
+  }
+}
   @override
   void initState() {
     super.initState();
