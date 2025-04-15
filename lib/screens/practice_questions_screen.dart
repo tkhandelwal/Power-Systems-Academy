@@ -116,6 +116,198 @@ class PracticeQuestionsScreenState extends State<PracticeQuestionsScreen> {
         topic: 'Power System Protection',
         difficulty: 'Basic',
       ),
+      PracticeQuestion(
+        question: 'What is the primary purpose of a power transformer?',
+        options: [
+          'To convert AC power to DC power',
+          'To change voltage levels in AC power systems',
+          'To store electrical energy',
+          'To generate electricity',
+        ],
+        correctAnswerIndex: 1,
+        explanation: 'Power transformers are primarily used to change voltage levels in AC power systems, allowing efficient power transmission over long distances at high voltages and safe utilization at lower voltages.',
+        topic: 'Transformers',
+        difficulty: 'Basic',
+      ),
+      PracticeQuestion(
+        question: 'Which of the following is NOT a common method for starting large induction motors?',
+        options: [
+          'Direct-on-line (DOL) starting',
+          'Star-delta starting',
+          'Brushless excitation',
+          'Soft starter',
+        ],
+        correctAnswerIndex: 2,
+        explanation: 'Brushless excitation is a method used for synchronous motors, not induction motors. The other options (DOL, star-delta, and soft starters) are all common methods for starting induction motors.',
+        topic: 'Rotating Machines',
+        difficulty: 'Intermediate',
+      ),
+      PracticeQuestion(
+        question: 'In a balanced three-phase system, the relationship between line voltage (VL) and phase voltage (VP) in a wye-connected load is:',
+        options: [
+          'VL = VP',
+          'VL = VP × √3',
+          'VL = VP ÷ √3',
+          'VL = VP × 3',
+        ],
+        correctAnswerIndex: 1,
+        explanation: 'In a wye-connected (star-connected) load in a balanced three-phase system, the line voltage is √3 times the phase voltage: VL = VP × √3.',
+        topic: 'Circuit Analysis',
+        difficulty: 'Basic',
+      ),
+      PracticeQuestion(
+        question: 'What is the primary function of a current transformer (CT) in power systems?',
+        options: [
+          'To step up voltage for transmission',
+          'To measure high currents safely',
+          'To store electrical energy',
+          'To regulate system frequency',
+        ],
+        correctAnswerIndex: 1,
+        explanation: 'Current transformers (CTs) are primarily used to measure high currents safely by stepping down the current to a standardized value (typically 1A or 5A) that can be safely measured by instruments.',
+        topic: 'Measurement and Instrumentation',
+        difficulty: 'Basic',
+      ),
+      PracticeQuestion(
+        question: 'A 100 kVA transformer has a full-load copper loss of 1,200 W and a core loss of 800 W. Calculate its full-load efficiency at 0.8 power factor lagging.',
+        options: [
+          '96.8%',
+          '97.5%',
+          '98.0%',
+          '95.2%',
+        ],
+        correctAnswerIndex: 0,
+        explanation: 'To calculate the full-load efficiency:\n'
+                     'Output power = 100 kVA × 0.8 = 80 kW\n'
+                     'Input power = Output power + Core loss + Copper loss = 80 kW + 0.8 kW + 1.2 kW = 82 kW\n'
+                     'Efficiency = (Output power ÷ Input power) × 100% = (80 ÷ 82) × 100% = 96.8%',
+        topic: 'Transformers',
+        difficulty: 'Advanced',
+      ),
+      PracticeQuestion(
+        question: 'Which NEC article covers "Overcurrent Protection"?',
+        options: [
+          'Article 210',
+          'Article 240',
+          'Article 310',
+          'Article 430',
+        ],
+        correctAnswerIndex: 1,
+        explanation: 'NEC Article 240 covers "Overcurrent Protection" which includes requirements for fuses, circuit breakers, and other overcurrent devices. Article 210 covers "Branch Circuits," Article 310 covers "Conductors for General Wiring," and Article 430 covers "Motors, Motor Circuits, and Controllers."',
+        topic: 'Codes and Standards',
+        difficulty: 'Intermediate',
+      ),
+      PracticeQuestion(
+        question: 'A generator delivers 10 MW at 0.8 power factor lagging. What is the reactive power delivered by the generator?',
+        options: [
+          '6 MVAR',
+          '7.5 MVAR',
+          '8 MVAR',
+          '12.5 MVAR',
+        ],
+        correctAnswerIndex: 1,
+        explanation: 'For a power triangle with active power P and power factor cos(φ):\n'
+                     'Reactive power Q = P × tan(φ) = P × tan(cos⁻¹(pf))\n'
+                     'Q = 10 MW × tan(cos⁻¹(0.8)) = 10 MW × tan(36.87°) = 10 MW × 0.75 = 7.5 MVAR',
+        topic: 'Power System Analysis',
+        difficulty: 'Intermediate',
+      ),
+      PracticeQuestion(
+        question: 'What is the purpose of differential protection in transformers?',
+        options: [
+          'To detect voltage fluctuations',
+          'To protect against overloads',
+          'To detect internal faults by comparing currents',
+          'To provide backup protection for external faults',
+        ],
+        correctAnswerIndex: 2,
+        explanation: 'Differential protection in transformers works by comparing the current entering and leaving the transformer. Under normal operation or external faults, these currents should be equal (accounting for turns ratio). An internal fault causes an imbalance, triggering the relay to trip the circuit breakers and isolate the transformer.',
+        topic: 'Power System Protection',
+        difficulty: 'Intermediate',
+      ),
+      PracticeQuestion(
+        question: 'According to NEC, what is the maximum allowed voltage drop for branch circuits?',
+        options: [
+          '1%',
+          '3%',
+          '5%',
+          '8%',
+        ],
+        correctAnswerIndex: 1,
+        explanation: 'According to NEC recommendations in the Informational Notes (not a requirement), the maximum voltage drop for branch circuits should not exceed a 3% drop. The total voltage drop for both feeders and branch circuits should not exceed 5%.',
+        topic: 'Codes and Standards',
+        difficulty: 'Basic',
+      ),
+      PracticeQuestion(
+        question: 'A 3-phase, 480V, 60Hz induction motor has a nameplate rating of 100 HP and 92% efficiency at full load. What is the full load current?',
+        options: [
+          '92.3 A',
+          '108.7 A',
+          '124.8 A',
+          '151.2 A',
+        ],
+        correctAnswerIndex: 2,
+        explanation: 'For a 3-phase motor, the full load current is calculated as:\n'
+                     'I = P / (√3 × V × PF × η)\n'
+                     'Where P = 100 HP × 746 W/HP = 74,600 W, V = 480V, η = 0.92\n'
+                     'Assuming PF = 0.85 (typical for induction motors):\n'
+                     'I = 74,600 / (√3 × 480 × 0.85 × 0.92) = 74,600 / 597.8 = 124.8 A',
+        topic: 'Rotating Machines',
+        difficulty: 'Advanced',
+      ),
+      PracticeQuestion(
+        question: 'What is the purpose of a grounding transformer in a power system?',
+        options: [
+          'To step up voltage for transmission',
+          'To provide a ground reference in ungrounded systems',
+          'To isolate harmonic distortion',
+          'To improve power factor',
+        ],
+        correctAnswerIndex: 1,
+        explanation: 'A grounding transformer (typically a zig-zag transformer) is used to provide a ground reference point in ungrounded or delta-connected systems. This allows ground fault detection and provides a path for zero-sequence currents during unbalanced conditions or ground faults.',
+        topic: 'Transformers',
+        difficulty: 'Intermediate',
+      ),
+      PracticeQuestion(
+        question: 'Which IEEE standard covers "Recommended Practice for Electric Power Distribution for Industrial Plants"?',
+        options: [
+          'IEEE 141',
+          'IEEE 242',
+          'IEEE 519',
+          'IEEE 1584',
+        ],
+        correctAnswerIndex: 0,
+        explanation: 'IEEE 141, also known as the "Red Book," covers "Recommended Practice for Electric Power Distribution for Industrial Plants." IEEE 242 (Buff Book) covers protection and coordination, IEEE 519 covers harmonics, and IEEE 1584 covers arc flash hazard calculations.',
+        topic: 'Codes and Standards',
+        difficulty: 'Intermediate',
+      ),
+      PracticeQuestion(
+        question: 'In power system analysis, what does the term "per unit" refer to?',
+        options: [
+          'The cost of electricity per unit of consumption',
+          'A normalization method expressing system quantities as decimal fractions of a base value',
+          'The efficiency of a power plant per unit of fuel',
+          'The power output per unit area of solar panels',
+        ],
+        correctAnswerIndex: 1,
+        explanation: 'The "per unit" system is a method of normalizing power system parameters by expressing them as decimal fractions of defined base values. This simplifies calculations, especially in transformers where turns ratios are automatically accounted for when using a common system-wide base.',
+        topic: 'Power System Analysis',
+        difficulty: 'Basic',
+      ),
+      PracticeQuestion(
+        question: 'A 3-phase, 480V system supplies a balanced load of 150 kW at 0.8 power factor lagging. What is the line current?',
+        options: [
+          '180.4 A',
+          '225.5 A',
+          '312.5 A',
+          '104.2 A',
+        ],
+        correctAnswerIndex: 0,
+        explanation: 'For a 3-phase system: I = P / (√3 × V × PF)\n'
+                     'I = 150,000 W / (√3 × 480 V × 0.8) = 150,000 / 831.4 = 180.4 A',
+        topic: 'Circuit Analysis',
+        difficulty: 'Intermediate',
+      ),
     ];
   }
   
@@ -764,196 +956,4 @@ class PracticeQuestion {
     required this.topic,
     required this.difficulty,
   });
-} is the primary purpose of a power transformer?',
-        options: [
-          'To convert AC power to DC power',
-          'To change voltage levels in AC power systems',
-          'To store electrical energy',
-          'To generate electricity',
-        ],
-        correctAnswerIndex: 1,
-        explanation: 'Power transformers are primarily used to change voltage levels in AC power systems, allowing efficient power transmission over long distances at high voltages and safe utilization at lower voltages.',
-        topic: 'Transformers',
-        difficulty: 'Basic',
-      ),
-      PracticeQuestion(
-        question: 'Which of the following is NOT a common method for starting large induction motors?',
-        options: [
-          'Direct-on-line (DOL) starting',
-          'Star-delta starting',
-          'Brushless excitation',
-          'Soft starter',
-        ],
-        correctAnswerIndex: 2,
-        explanation: 'Brushless excitation is a method used for synchronous motors, not induction motors. The other options (DOL, star-delta, and soft starters) are all common methods for starting induction motors.',
-        topic: 'Rotating Machines',
-        difficulty: 'Intermediate',
-      ),
-      PracticeQuestion(
-        question: 'In a balanced three-phase system, the relationship between line voltage (VL) and phase voltage (VP) in a wye-connected load is:',
-        options: [
-          'VL = VP',
-          'VL = VP × √3',
-          'VL = VP ÷ √3',
-          'VL = VP × 3',
-        ],
-        correctAnswerIndex: 1,
-        explanation: 'In a wye-connected (star-connected) load in a balanced three-phase system, the line voltage is √3 times the phase voltage: VL = VP × √3.',
-        topic: 'Circuit Analysis',
-        difficulty: 'Basic',
-      ),
-      PracticeQuestion(
-        question: 'What is the primary function of a current transformer (CT) in power systems?',
-        options: [
-          'To step up voltage for transmission',
-          'To measure high currents safely',
-          'To store electrical energy',
-          'To regulate system frequency',
-        ],
-        correctAnswerIndex: 1,
-        explanation: 'Current transformers (CTs) are primarily used to measure high currents safely by stepping down the current to a standardized value (typically 1A or 5A) that can be safely measured by instruments.',
-        topic: 'Measurement and Instrumentation',
-        difficulty: 'Basic',
-      ),
-      PracticeQuestion(
-        question: 'A 100 kVA transformer has a full-load copper loss of 1,200 W and a core loss of 800 W. Calculate its full-load efficiency at 0.8 power factor lagging.',
-        options: [
-          '96.8%',
-          '97.5%',
-          '98.0%',
-          '95.2%',
-        ],
-        correctAnswerIndex: 0,
-        explanation: 'To calculate the full-load efficiency:\n'
-                     'Output power = 100 kVA × 0.8 = 80 kW\n'
-                     'Input power = Output power + Core loss + Copper loss = 80 kW + 0.8 kW + 1.2 kW = 82 kW\n'
-                     'Efficiency = (Output power ÷ Input power) × 100% = (80 ÷ 82) × 100% = 96.8%',
-        topic: 'Transformers',
-        difficulty: 'Advanced',
-      ),
-      PracticeQuestion(
-        question: 'Which NEC article covers "Overcurrent Protection"?',
-        options: [
-          'Article 210',
-          'Article 240',
-          'Article 310',
-          'Article 430',
-        ],
-        correctAnswerIndex: 1,
-        explanation: 'NEC Article 240 covers "Overcurrent Protection" which includes requirements for fuses, circuit breakers, and other overcurrent devices. Article 210 covers "Branch Circuits," Article 310 covers "Conductors for General Wiring," and Article 430 covers "Motors, Motor Circuits, and Controllers."',
-        topic: 'Codes and Standards',
-        difficulty: 'Intermediate',
-      ),
-      PracticeQuestion(
-        question: 'A generator delivers 10 MW at 0.8 power factor lagging. What is the reactive power delivered by the generator?',
-        options: [
-          '6 MVAR',
-          '7.5 MVAR',
-          '8 MVAR',
-          '12.5 MVAR',
-        ],
-        correctAnswerIndex: 1,
-        explanation: 'For a power triangle with active power P and power factor cos(φ):\n'
-                     'Reactive power Q = P × tan(φ) = P × tan(cos⁻¹(pf))\n'
-                     'Q = 10 MW × tan(cos⁻¹(0.8)) = 10 MW × tan(36.87°) = 10 MW × 0.75 = 7.5 MVAR',
-        topic: 'Power System Analysis',
-        difficulty: 'Intermediate',
-      ),
-      PracticeQuestion(
-        question: 'What is the purpose of differential protection in transformers?',
-        options: [
-          'To detect voltage fluctuations',
-          'To protect against overloads',
-          'To detect internal faults by comparing currents',
-          'To provide backup protection for external faults',
-        ],
-        correctAnswerIndex: 2,
-        explanation: 'Differential protection in transformers works by comparing the current entering and leaving the transformer. Under normal operation or external faults, these currents should be equal (accounting for turns ratio). An internal fault causes an imbalance, triggering the relay to trip the circuit breakers and isolate the transformer.',
-        topic: 'Power System Protection',
-        difficulty: 'Intermediate',
-      ),
-      PracticeQuestion(
-        question: 'According to NEC, what is the maximum allowed voltage drop for branch circuits?',
-        options: [
-          '1%',
-          '3%',
-          '5%',
-          '8%',
-        ],
-        correctAnswerIndex: 1,
-        explanation: 'According to NEC recommendations in the Informational Notes (not a requirement), the maximum voltage drop for branch circuits should not exceed a 3% drop. The total voltage drop for both feeders and branch circuits should not exceed 5%.',
-        topic: 'Codes and Standards',
-        difficulty: 'Basic',
-      ),
-      PracticeQuestion(
-        question: 'A 3-phase, 480V, 60Hz induction motor has a nameplate rating of 100 HP and 92% efficiency at full load. What is the full load current?',
-        options: [
-          '92.3 A',
-          '108.7 A',
-          '124.8 A',
-          '151.2 A',
-        ],
-        correctAnswerIndex: 2,
-        explanation: 'For a 3-phase motor, the full load current is calculated as:\n'
-                     'I = P / (√3 × V × PF × η)\n'
-                     'Where P = 100 HP × 746 W/HP = 74,600 W, V = 480V, η = 0.92\n'
-                     'Assuming PF = 0.85 (typical for induction motors):\n'
-                     'I = 74,600 / (√3 × 480 × 0.85 × 0.92) = 74,600 / 597.8 = 124.8 A',
-        topic: 'Rotating Machines',
-        difficulty: 'Advanced',
-      ),
-      PracticeQuestion(
-        question: 'What is the purpose of a grounding transformer in a power system?',
-        options: [
-          'To step up voltage for transmission',
-          'To provide a ground reference in ungrounded systems',
-          'To isolate harmonic distortion',
-          'To improve power factor',
-        ],
-        correctAnswerIndex: 1,
-        explanation: 'A grounding transformer (typically a zig-zag transformer) is used to provide a ground reference point in ungrounded or delta-connected systems. This allows ground fault detection and provides a path for zero-sequence currents during unbalanced conditions or ground faults.',
-        topic: 'Transformers',
-        difficulty: 'Intermediate',
-      ),
-      PracticeQuestion(
-        question: 'Which IEEE standard covers "Recommended Practice for Electric Power Distribution for Industrial Plants"?',
-        options: [
-          'IEEE 141',
-          'IEEE 242',
-          'IEEE 519',
-          'IEEE 1584',
-        ],
-        correctAnswerIndex: 0,
-        explanation: 'IEEE 141, also known as the "Red Book," covers "Recommended Practice for Electric Power Distribution for Industrial Plants." IEEE 242 (Buff Book) covers protection and coordination, IEEE 519 covers harmonics, and IEEE 1584 covers arc flash hazard calculations.',
-        topic: 'Codes and Standards',
-        difficulty: 'Intermediate',
-      ),
-      PracticeQuestion(
-        question: 'In power system analysis, what does the term "per unit" refer to?',
-        options: [
-          'The cost of electricity per unit of consumption',
-          'A normalization method expressing system quantities as decimal fractions of a base value',
-          'The efficiency of a power plant per unit of fuel',
-          'The power output per unit area of solar panels',
-        ],
-        correctAnswerIndex: 1,
-        explanation: 'The "per unit" system is a method of normalizing power system parameters by expressing them as decimal fractions of defined base values. This simplifies calculations, especially in transformers where turns ratios are automatically accounted for when using a common system-wide base.',
-        topic: 'Power System Analysis',
-        difficulty: 'Basic',
-      ),
-      PracticeQuestion(
-        question: 'A 3-phase, 480V system supplies a balanced load of 150 kW at 0.8 power factor lagging. What is the line current?',
-        options: [
-          '180.4 A',
-          '225.5 A',
-          '312.5 A',
-          '104.2 A',
-        ],
-        correctAnswerIndex: 0,
-        explanation: 'For a 3-phase system: I = P / (√3 × V × PF)\n'
-                     'I = 150,000 W / (√3 × 480 V × 0.8) = 150,000 / 831.4 = 180.4 A',
-        topic: 'Circuit Analysis',
-        difficulty: 'Intermediate',
-      ),
-      PracticeQuestion(
-        question: 'What
+}
