@@ -135,73 +135,83 @@ class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
   }
   
   void _generateStudyPlan() {
-    if (_examDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please select an exam date first'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
+  if (_examDate == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Please select an exam date first'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    return;
+  }
+  
+  // Parse weekly study hours
+  int weeklyStudyHours;
+  try {
+    weeklyStudyHours = int.parse(_studyHoursController.text);
+    if (weeklyStudyHours <= 0) throw FormatException();
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Please enter a valid number of study hours'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    return;
+  }
     
-    // Parse weekly study hours
-    int weeklyStudyHours;
-    try {
-      weeklyStudyHours = int.parse(_studyHoursController.text);
-      if (weeklyStudyHours <= 0) throw FormatException();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter a valid number of study hours'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
+  // Calculate weeks available for study
+  final DateTime now = DateTime.now();
+  final int daysUntilExam = _examDate!.difference(now).inDays;
+  final int weeksUntilExam = (daysUntilExam / 7).ceil();
+  
+  if (weeksUntilExam <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Exam date must be in the future'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    return;
+  }
     
-    // Calculate weeks available for study
-    final DateTime now = DateTime.now();
-    final int daysUntilExam = _examDate!.difference(now).inDays;
-    final int weeksUntilExam = (daysUntilExam / 7).ceil();
-    
-    if (weeksUntilExam <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Exam date must be in the future'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-    
-    // Clear existing plan
-    _studyPlan = [];
+   // Clear existing plan
+  _studyPlan = [];
     
     // Calculate total study hours available
-    final int totalStudyHours = weeksUntilExam * weeklyStudyHours;
+  final int totalStudyHours = weeksUntilExam * weeklyStudyHours;
     
     // Allocate hours proportionally to topics based on exam percentage
-    int hoursAllocated = 0;
+    int totalHoursAllocated = 0;
     
     for (final topic in _examTopics) {
-      // Calculate hours for this topic
-      final int topicHours = ((totalStudyHours * topic.percentage) / 100).round();
-      hoursAllocated += topicHours;
-      
-      // Calculate weeks needed for this topic
-      final int weeksForTopic = (topicHours / weeklyStudyHours).ceil();
-      
-      // Create study plan item
-      _studyPlan.add(
-        StudyPlanItem(
-          topic: topic.name,
-          totalHours: topicHours,
-          weeksAllocated: weeksForTopic,
-          subtopics: topic.subtopics,
-        ),
-      );
-    }
+    // Calculate hours for this topic
+    final int topicHours = ((totalStudyHours * topic.percentage) / 100).round();
+    totalHoursAllocated += topicHours;
+    
+    // Calculate weeks needed for this topic
+    final int weeksForTopic = (topicHours / weeklyStudyHours).ceil();
+    
+    // Create study plan item
+    _studyPlan.add(
+      StudyPlanItem(
+        topic: topic.name,
+        totalHours: topicHours,
+        weeksAllocated: weeksForTopic,
+        subtopics: topic.subtopics,
+      ),
+    );
+  }
+
+   // Verify that all hours are allocated (with possible small rounding differences)
+  // and display a message if there's a significant discrepancy
+  if ((totalHoursAllocated - totalStudyHours).abs() > totalStudyHours * 0.05) {
+    // If more than 5% difference between allocated and total available hours
+    print('Warning: Allocated hours ($totalHoursAllocated) significantly differ from total available hours ($totalStudyHours)');
+    
+    // Optionally adjust the plan if needed
+    // This is where you could redistribute hours to match the total more closely
+  }
     
     // Refresh UI
     setState(() {});

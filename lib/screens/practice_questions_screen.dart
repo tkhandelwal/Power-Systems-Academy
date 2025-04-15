@@ -32,18 +32,7 @@ class PracticeQuestionsScreenState extends State<PracticeQuestionsScreen> {
   int _totalQuizQuestions = 10;
   
 
-  Color _getDifficultyColor(String difficulty) {
-  switch (difficulty) {
-    case 'Basic':
-      return Colors.green;
-    case 'Intermediate':
-      return Colors.orange;
-    case 'Advanced':
-      return Colors.red;
-    default:
-      return Colors.blue;
-  }
-}
+  
   @override
   void initState() {
     super.initState();
@@ -476,6 +465,11 @@ class PracticeQuestionsScreenState extends State<PracticeQuestionsScreen> {
               'You answered $_correctAnswers out of $_totalQuizQuestions questions correctly.',
               style: TextStyle(fontSize: 16),
             ),
+            if (_incorrectAnswers > 0)
+              Text(
+                'Incorrect answers: $_incorrectAnswers',
+                style: TextStyle(fontSize: 16, color: Colors.red),
+              ),
             SizedBox(height: 16),
             Text(
               'Score: ${((_correctAnswers / _totalQuizQuestions) * 100).toStringAsFixed(1)}%',

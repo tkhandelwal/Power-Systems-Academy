@@ -36,79 +36,74 @@ class MotorStartingCalculatorScreenState extends State<MotorStartingCalculatorSc
   bool _hasCalculated = false;
   
   // Calculate motor starting values
-  void _calculateMotorStarting() {
-    if (_formKey.currentState!.validate()) {
-      // Parse input values
-      double motorRating = double.parse(_motorRatingController.text); // in kW
-      double powerFactor = double.parse(_powerFactorController.text);
-      double efficiency = double.parse(_efficiencyController.text);
-      double voltage = double.parse(_voltageController.text); // in V
-      double startingFactor = double.parse(_startingFactorController.text);
-      double systemImpedance = double.parse(_systemImpedanceController.text); // in %
-      double transformerRating = double.parse(_transformerRatingController.text); // in kVA
-      double transformerImpedance = double.parse(_transformerImpedanceController.text); // in %
-      
-      // Calculate full load current (in A)
-      if (_motorType == 'induction') {
-        _fullLoadCurrent = (motorRating * 1000) / (sqrt(3) * voltage * powerFactor * efficiency);
-      } else { // synchronous
-        _fullLoadCurrent = (motorRating * 1000) / (sqrt(3) * voltage * efficiency);
-      }
-      
-      // Calculate starting current based on starting method
-      double startingCurrentFactor;
-      switch (_startingMethod) {
-        case 'direct':
-          startingCurrentFactor = startingFactor;
-          break;
-        case 'star-delta':
-          startingCurrentFactor = startingFactor / 3.0;
-          break;
-        case 'autotransformer':
-          startingCurrentFactor = startingFactor * 0.4; // Assuming 40% tap
-          break;
-        case 'soft-starter':
-          startingCurrentFactor = startingFactor * 0.3; // Typical soft starter limitation
-          break;
-        case 'vfd':
-          startingCurrentFactor = 1.5; // Typical VFD current limitation
-          break;
-        default:
-          startingCurrentFactor = startingFactor;
-      }
-      
-      _startingCurrent = _fullLoadCurrent * startingCurrentFactor;
-      
-      // Calculate system impedance for voltage drop calculation
-      // Convert from % to per unit
-      double systemZpu = systemImpedance / 100.0;
-      double transformerZpu = transformerImpedance / 100.0;
-      
-      // Calculate transformer base impedance
-      double systemMVA = transformerRating / 1000.0; // in MVA
-      double transformerBaseZ = (voltage * voltage) / (transformerRating * 1000); // in ohms
-      
-      // Total system impedance in per unit
-      double totalZpu = systemZpu + transformerZpu;
-      
-      // Calculate bus fault level (in MVA)
-      _busFaultLevel = systemMVA / totalZpu;
-      
-      // Calculate voltage drop during starting (in %)
-      double motorStartingMVA = (_startingCurrent * voltage * sqrt(3)) / 1000000; // in MVA
-      _voltageDrop = (motorStartingMVA / _busFaultLevel) * 100;
-      
-      // Calculate approximate starting torque (assuming torque ~ V²)
-      double relativeVoltage = (100 - _voltageDrop) / 100;
-      _motorStartingTorque = (relativeVoltage * relativeVoltage) * 100; // in % of nominal
-      
-      // Update state to show results
-      setState(() {
-        _hasCalculated = true;
-      });
+void _calculateMotorStarting() {
+  if (_formKey.currentState!.validate()) {
+    // Parse input values
+    double motorRating = double.parse(_motorRatingController.text); // in kW
+    double powerFactor = double.parse(_powerFactorController.text);
+    double efficiency = double.parse(_efficiencyController.text);
+    double voltage = double.parse(_voltageController.text); // in V
+    double startingFactor = double.parse(_startingFactorController.text);
+    double systemImpedance = double.parse(_systemImpedanceController.text); // in %
+    double transformerRating = double.parse(_transformerRatingController.text); // in kVA
+    double transformerImpedance = double.parse(_transformerImpedanceController.text); // in %
+    
+    // Calculate full load current (in A)
+    if (_motorType == 'induction') {
+      _fullLoadCurrent = (motorRating * 1000) / (sqrt(3) * voltage * powerFactor * efficiency);
+    } else { // synchronous
+      _fullLoadCurrent = (motorRating * 1000) / (sqrt(3) * voltage * efficiency);
     }
+    
+    // Calculate starting current based on starting method
+    double startingCurrentFactor;
+    switch (_startingMethod) {
+      case 'direct':
+        startingCurrentFactor = startingFactor;
+        break;
+      case 'star-delta':
+        startingCurrentFactor = startingFactor / 3.0;
+        break;
+      case 'autotransformer':
+        startingCurrentFactor = startingFactor * 0.4; // Assuming 40% tap
+        break;
+      case 'soft-starter':
+        startingCurrentFactor = startingFactor * 0.3; // Typical soft starter limitation
+        break;
+      case 'vfd':
+        startingCurrentFactor = 1.5; // Typical VFD current limitation
+        break;
+      default:
+        startingCurrentFactor = startingFactor;
+    }
+    
+    _startingCurrent = _fullLoadCurrent * startingCurrentFactor;
+    
+    // Calculate system impedance for voltage drop calculation
+    // Convert from % to per unit
+    double systemZpu = systemImpedance / 100.0;
+    double transformerZpu = transformerImpedance / 100.0;
+    
+    // Calculate transformer base impedance
+    double systemMVA = transformerRating / 1000.0; // in MVA
+    
+    // Calculate bus fault level (in MVA)
+    _busFaultLevel = systemMVA / (systemZpu + transformerZpu);
+    
+    // Calculate voltage drop during starting (in %)
+    double motorStartingMVA = (_startingCurrent * voltage * sqrt(3)) / 1000000; // in MVA
+    _voltageDrop = (motorStartingMVA / _busFaultLevel) * 100;
+    
+    // Calculate approximate starting torque (assuming torque ~ V²)
+    double relativeVoltage = (100 - _voltageDrop) / 100;
+    _motorStartingTorque = (relativeVoltage * relativeVoltage) * 100; // in % of nominal
+    
+    // Update state to show results
+    setState(() {
+      _hasCalculated = true;
+    });
   }
-  
+}
   @override
   void dispose() {
     _motorRatingController.dispose();

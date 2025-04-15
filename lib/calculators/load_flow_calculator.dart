@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+// Import the complex number utility class
+import 'package:powersystemsacademy/utils/complex.dart';
+
 class LoadFlowCalculatorScreen extends StatefulWidget {
   const LoadFlowCalculatorScreen({super.key});
 
@@ -19,18 +22,18 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
   final TextEditingController _toleranceController = TextEditingController(text: '0.0001');
   final TextEditingController _maxIterationsController = TextEditingController(text: '20');
   
-  // Bus types
-  List<String> _busTypes = ['Slack', 'PV', 'PQ'];
+  // Bus types - making this final as suggested
+  final List<String> _busTypes = ['Slack', 'PV', 'PQ'];
   
   // Dynamic list of buses with their properties
-  List<Map<String, dynamic>> _buses = [];
+  final List<Map<String, dynamic>> _buses = [];
   
   // Matrix for line impedances
-  List<List<TextEditingController>> _lineImpedanceControllers = [];
+  final List<List<TextEditingController>> _lineImpedanceControllers = [];
   
   // Results
-  List<Map<String, dynamic>> _busResults = [];
-  List<Map<String, dynamic>> _lineResults = [];
+  final List<Map<String, dynamic>> _busResults = [];
+  final List<Map<String, dynamic>> _lineResults = [];
   bool _hasCalculated = false;
   String _iterationCount = '';
   bool _hasConverged = false;
@@ -78,80 +81,411 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
   
   void _calculateLoadFlow() {
     if (_formKey.currentState!.validate()) {
-      // In a real application, this would implement a load flow algorithm
-      // such as Gauss-Seidel or Newton-Raphson
-      
-      // For this simplified example, we'll just simulate some results
-      _simulateLoadFlowResults();
-      
-      // Update state to show results
-      setState(() {
-        _hasCalculated = true;
-        _iterationCount = '5'; // Simulated
-        _hasConverged = true;
-      });
+      try {
+        // Parse input parameters
+        int busCount = int.parse(_busCountController.text);
+        double slackBusVoltage = double.parse(_slackBusVoltageController.text);
+        double tolerance = double.parse(_toleranceController.text);
+        int maxIterations = int.parse(_maxIterationsController.text);
+        
+        // Create arrays for bus data
+        List<Map<String, dynamic>> busData = [];
+        for (var bus in _buses) {
+          busData.add({
+            'number': bus['number'],
+            'type': bus['type'],
+            'voltage': double.parse(bus['voltage'].text),
+            'angle': double.parse(bus['angle'].text) * (pi / 180), // Convert to radians
+            'activePower': double.parse(bus['activePower'].text),
+            'reactivePower': double.parse(bus['reactivePower'].text),
+          });
+        }
+        
+        // Create admittance matrix
+        List<List<Complex>> Y = List.generate(
+          busCount, 
+          (i) => List.generate(
+            busCount, 
+            (j) => Complex(0, 0)
+          )
+        );
+        
+        // Fill admittance matrix from line impedance values
+        for (int i = 0; i < busCount; i++) {
+          for (int j = 0; j < busCount; j++) {
+            if (i != j) {
+              double impedance = double.parse(_lineImpedanceControllers[i][j].text);
+              if (impedance > 0) {
+                // Convert impedance to admittance (Y = 1/Z)
+                Complex admittance = Complex(1, 0) / Complex(0, impedance);
+                Y[i][j] = -admittance; // Off-diagonal elements
+                
+                // Add to diagonal elements
+                Y[i][i] = Y[i][i] + admittance;
+                Y[j][j] = Y[j][j] + admittance;
+              }
+            }
+          }
+        }
+        
+        // Newton-Raphson load flow algorithm
+        int iterations = 0;
+        bool converged = false;
+        double maxMismatch = double.infinity;
+        
+        // Arrays to store calculated values
+        List<double> calculatedV = List.generate(busCount, (i) => busData[i]['voltage']);
+        List<double> calculatedTheta = List.generate(busCount, (i) => busData[i]['angle']);
+        List<double> calculatedP = List.generate(busCount, (i) => 0.0);
+        List<double> calculatedQ = List.generate(busCount, (i) => 0.0);
+        
+        while (!converged && iterations < maxIterations) {
+          // Calculate power mismatches
+          List<double> deltaPQ = [];
+          
+          // Calculate P and Q at each bus
+          for (int i = 0; i < busCount; i++) {
+            calculatedP[i] = 0;
+            calculatedQ[i] = 0;
+            
+            for (int j = 0; j < busCount; j++) {
+              Complex Vi = Complex.polar(calculatedV[i], calculatedTheta[i]);
+              Complex Vj = Complex.polar(calculatedV[j], calculatedTheta[j]);
+              Complex Yij = Y[i][j];
+              
+              Complex Sij = Vi * (Yij * Vj).conjugate();
+              calculatedP[i] += Sij.real;
+              calculatedQ[i] += Sij.imaginary;
+            }
+            
+            // Add power mismatches for PV and PQ buses
+            if (busData[i]['type'] != 'Slack') {
+              // Active power mismatch (all buses except slack)
+              double deltaP = busData[i]['activePower'] - calculatedP[i];
+              deltaPQ.add(deltaP);
+              
+              // Reactive power mismatch (only PQ buses)
+              if (busData[i]['type'] == 'PQ') {
+                double deltaQ = busData[i]['reactivePower'] - calculatedQ[i];
+                deltaPQ.add(deltaQ);
+              }
+            }
+          }
+          
+          // Check for convergence
+          maxMismatch = 0;
+          for (double mismatch in deltaPQ) {
+            maxMismatch = max(maxMismatch, mismatch.abs());
+          }
+          
+          if (maxMismatch < tolerance) {
+            converged = true;
+            break;
+          }
+          
+          // Calculate Jacobian matrix
+          List<List<double>> J = _calculateJacobian(busData, Y, calculatedV, calculatedTheta);
+          
+          // Solve J * deltaX = deltaPQ using Gaussian elimination
+          List<double> deltaX = _solveLinearSystem(J, deltaPQ);
+          
+          // Update voltage angles and magnitudes
+          int index = 0;
+          for (int i = 0; i < busCount; i++) {
+            if (busData[i]['type'] != 'Slack') {
+              // Update angle (all buses except slack)
+              calculatedTheta[i] += deltaX[index++];
+              
+              // Update voltage magnitude (only PQ buses)
+              if (busData[i]['type'] == 'PQ') {
+                calculatedV[i] += deltaX[index++];
+              }
+            }
+          }
+          
+          iterations++;
+        }
+        
+        // Prepare results
+        _busResults.clear();
+        for (int i = 0; i < busCount; i++) {
+          _busResults.add({
+            'number': busData[i]['number'],
+            'type': busData[i]['type'],
+            'voltage': calculatedV[i].toStringAsFixed(4),
+            'angle': (calculatedTheta[i] * (180 / pi)).toStringAsFixed(4), // Convert to degrees
+            'activePower': calculatedP[i].toStringAsFixed(4),
+            'reactivePower': calculatedQ[i].toStringAsFixed(4),
+          });
+        }
+        
+        // Calculate line flows
+        _lineResults.clear();
+        for (int i = 0; i < busCount; i++) {
+          for (int j = i + 1; j < busCount; j++) {
+            double impedance = double.parse(_lineImpedanceControllers[i][j].text);
+            if (impedance > 0) {
+              Complex Vi = Complex.polar(calculatedV[i], calculatedTheta[i]);
+              Complex Vj = Complex.polar(calculatedV[j], calculatedTheta[j]);
+              Complex Yij = Y[i][j];
+              
+              Complex Iij = (Vi - Vj) / Complex(0, impedance);
+              Complex Sij = Vi * Iij.conjugate();
+              Complex Sji = Vj * (-Iij).conjugate();
+              
+              double losses = (Sij.real + Sji.real).abs();
+              
+              _lineResults.add({
+                'from': i + 1,
+                'to': j + 1,
+                'activePower': Sij.real.toStringAsFixed(4),
+                'reactivePower': Sij.imaginary.toStringAsFixed(4),
+                'current': Iij.magnitude.toStringAsFixed(4),
+                'losses': losses.toStringAsFixed(4),
+              });
+            }
+          }
+        }
+        
+        // Update state to show results
+        setState(() {
+          _hasCalculated = true;
+          _iterationCount = iterations.toString();
+          _hasConverged = converged;
+        });
+      } catch (e) {
+        // Show error message if calculation fails
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error in calculation: ${e.toString()}'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
   
-  void _simulateLoadFlowResults() {
-    _busResults.clear();
-    _lineResults.clear();
+  // Helper method to calculate Jacobian matrix
+  List<List<double>> _calculateJacobian(
+    List<Map<String, dynamic>> busData,
+    List<List<Complex>> Y,
+    List<double> V,
+    List<double> theta
+  ) {
+    int busCount = busData.length;
     
-    // Simulate bus results
-    for (int i = 0; i < _buses.length; i++) {
-      double voltage = double.parse(_buses[i]['voltage'].text);
-      double angle = double.parse(_buses[i]['angle'].text);
-      double activePower = double.parse(_buses[i]['activePower'].text);
-      double reactivePower = double.parse(_buses[i]['reactivePower'].text);
-      
-      // Simulate some calculations
-      if (_buses[i]['type'] == 'PQ') {
-        voltage = voltage * (0.95 + 0.1 * Random().nextDouble());
-        angle = angle - (5 + 3 * Random().nextDouble());
-      } else if (_buses[i]['type'] == 'PV') {
-        reactivePower = reactivePower + (0.2 - 0.4 * Random().nextDouble());
-      }
-      
-      _busResults.add({
-        'number': i + 1,
-        'type': _buses[i]['type'],
-        'voltage': voltage.toStringAsFixed(4),
-        'angle': angle.toStringAsFixed(4),
-        'activePower': activePower.toStringAsFixed(4),
-        'reactivePower': reactivePower.toStringAsFixed(4),
-      });
+    // Determine Jacobian size based on number of equations
+    int pqCount = 0;  // Number of PQ buses
+    int pvCount = 0;  // Number of PV buses
+    
+    for (var bus in busData) {
+      if (bus['type'] == 'PQ') pqCount++;
+      if (bus['type'] == 'PV') pvCount++;
     }
     
-    // Simulate line results
-    for (int i = 0; i < _buses.length; i++) {
-      for (int j = i + 1; j < _buses.length; j++) {
-        double impedance = double.parse(_lineImpedanceControllers[i][j].text);
-        if (impedance > 0) {
-          double activePowerFlow = 0.5 + Random().nextDouble() * 0.5;
-          double reactivePowerFlow = 0.2 + Random().nextDouble() * 0.3;
-          double current = activePowerFlow / double.parse(_busResults[i]['voltage']);
-          double losses = current * current * impedance;
+    int jacobianSize = (pqCount * 2) + pvCount;  // 2 equations per PQ bus, 1 per PV bus
+    
+    // Initialize Jacobian matrix
+    List<List<double>> J = List.generate(
+      jacobianSize, 
+      (i) => List.generate(jacobianSize, (j) => 0.0)
+    );
+    
+    // Counters for building the Jacobian
+    int row = 0;
+    
+    // Each non-slack bus contributes rows to the Jacobian
+    for (int i = 0; i < busCount; i++) {
+      if (busData[i]['type'] == 'Slack') continue;
+      
+      int col = 0;
+      
+      // Calculate derivatives for active power equations (dP/dTheta and dP/dV)
+      for (int j = 0; j < busCount; j++) {
+        if (busData[j]['type'] == 'Slack') continue;
+        
+        // dP_i/dTheta_j
+        if (i == j) {
+          // Diagonal element for dP_i/dTheta_i
+          double sum = 0.0;
+          for (int k = 0; k < busCount; k++) {
+            if (k != i) {
+              Complex Yik = Y[i][k];
+              double Vk = V[k];
+              double thetak = theta[k];
+              double thetaik = theta[i] - thetak;
+              sum += V[i] * Vk * (Yik.real * sin(thetaik) - Yik.imaginary * cos(thetaik));
+            }
+          }
+          J[row][col] = -sum;
+        } else {
+          // Off-diagonal element for dP_i/dTheta_j
+          Complex Yij = Y[i][j];
+          double thetaij = theta[i] - theta[j];
+          J[row][col] = V[i] * V[j] * (Yij.real * sin(thetaij) - Yij.imaginary * cos(thetaij));
+        }
+        
+        col++;
+        
+        // dP_i/dV_j (only if j is PQ bus)
+        if (busData[j]['type'] == 'PQ') {
+          if (i == j) {
+            // Diagonal element for dP_i/dV_i
+            double sum = 0.0;
+            for (int k = 0; k < busCount; k++) {
+              if (k != i) {
+                Complex Yik = Y[i][k];
+                double Vk = V[k];
+                double thetaik = theta[i] - theta[k];
+                sum += Vk * (Yik.real * cos(thetaik) + Yik.imaginary * sin(thetaik));
+              }
+            }
+            J[row][col] = 2 * V[i] * Y[i][i].real + sum;
+          } else {
+            // Off-diagonal element for dP_i/dV_j
+            Complex Yij = Y[i][j];
+            double thetaij = theta[i] - theta[j];
+            J[row][col] = V[i] * (Yij.real * cos(thetaij) + Yij.imaginary * sin(thetaij));
+          }
+          col++;
+        }
+      }
+      
+      row++;
+      
+      // Calculate derivatives for reactive power equations (dQ/dTheta and dQ/dV)
+      // Only for PQ buses
+      if (busData[i]['type'] == 'PQ') {
+        col = 0;
+        
+        for (int j = 0; j < busCount; j++) {
+          if (busData[j]['type'] == 'Slack') continue;
           
-          _lineResults.add({
-            'from': i + 1,
-            'to': j + 1,
-            'activePower': activePowerFlow.toStringAsFixed(4),
-            'reactivePower': reactivePowerFlow.toStringAsFixed(4),
-            'current': current.toStringAsFixed(4),
-            'losses': losses.toStringAsFixed(4),
-          });
+          // dQ_i/dTheta_j
+          if (i == j) {
+            // Diagonal element for dQ_i/dTheta_i
+            double sum = 0.0;
+            for (int k = 0; k < busCount; k++) {
+              if (k != i) {
+                Complex Yik = Y[i][k];
+                double Vk = V[k];
+                double thetaik = theta[i] - theta[k];
+                sum += V[i] * Vk * (Yik.real * cos(thetaik) + Yik.imaginary * sin(thetaik));
+              }
+            }
+            J[row][col] = sum;
+          } else {
+            // Off-diagonal element for dQ_i/dTheta_j
+            Complex Yij = Y[i][j];
+            double thetaij = theta[i] - theta[j];
+            J[row][col] = -V[i] * V[j] * (Yij.real * cos(thetaij) + Yij.imaginary * sin(thetaij));
+          }
+          
+          col++;
+          
+          // dQ_i/dV_j (only if j is PQ bus)
+          if (busData[j]['type'] == 'PQ') {
+            if (i == j) {
+              // Diagonal element for dQ_i/dV_i
+              double sum = 0.0;
+              for (int k = 0; k < busCount; k++) {
+                if (k != i) {
+                  Complex Yik = Y[i][k];
+                  double Vk = V[k];
+                  double thetaik = theta[i] - theta[k];
+                  sum += Vk * (Yik.real * sin(thetaik) - Yik.imaginary * cos(thetaik));
+                }
+              }
+              J[row][col] = -2 * V[i] * Y[i][i].imaginary + sum;
+            } else {
+              // Off-diagonal element for dQ_i/dV_j
+              Complex Yij = Y[i][j];
+              double thetaij = theta[i] - theta[j];
+              J[row][col] = V[i] * (Yij.real * sin(thetaij) - Yij.imaginary * cos(thetaij));
+            }
+            col++;
+          }
+        }
+        
+        row++;
+      }
+    }
+    
+    return J;
+  }
+
+  // Helper method to solve linear system using Gaussian elimination
+  List<double> _solveLinearSystem(List<List<double>> A, List<double> b) {
+    int n = b.length;
+    if (n == 0) return [];
+    
+    // Make a copy of A and b to avoid modifying the originals
+    List<List<double>> aug = List.generate(
+      n, 
+      (i) => List.generate(n + 1, (j) => j < n ? A[i][j] : b[i])
+    );
+    
+    // Gaussian elimination with partial pivoting
+    for (int i = 0; i < n; i++) {
+      // Find pivot (largest element in column i)
+      int maxRow = i;
+      double maxVal = aug[i][i].abs();
+      
+      for (int k = i + 1; k < n; k++) {
+        if (aug[k][i].abs() > maxVal) {
+          maxRow = k;
+          maxVal = aug[k][i].abs();
+        }
+      }
+      
+      // Swap rows if needed
+      if (maxRow != i) {
+        List<double> temp = aug[i];
+        aug[i] = aug[maxRow];
+        aug[maxRow] = temp;
+      }
+      
+      // Check for singular matrix
+      if (aug[i][i].abs() < 1e-10) {
+        // Add a small value to diagonal to avoid division by zero
+        aug[i][i] = 1e-10;
+      }
+      
+      // Eliminate below
+      for (int k = i + 1; k < n; k++) {
+        double factor = aug[k][i] / aug[i][i];
+        
+        for (int j = i; j <= n; j++) {
+          aug[k][j] -= factor * aug[i][j];
         }
       }
     }
+    
+    // Back substitution
+    List<double> x = List.filled(n, 0.0);
+    for (int i = n - 1; i >= 0; i--) {
+      x[i] = aug[i][n];
+      
+      for (int j = i + 1; j < n; j++) {
+        x[i] -= aug[i][j] * x[j];
+      }
+      
+      x[i] /= aug[i][i];
+    }
+    
+    return x;
   }
   
   void _updateBusCount() {
-    int count = int.parse(_busCountController.text);
-    if (count >= 2 && count <= 10) {
-      setState(() {
-        _initializeBuses(count);
-        _hasCalculated = false;
-      });
+    if (_formKey.currentState!.validate()) {
+      int count = int.parse(_busCountController.text);
+      if (count >= 2 && count <= 10) {
+        setState(() {
+          _initializeBuses(count);
+          _hasCalculated = false;
+        });
+      }
     }
   }
   
@@ -497,7 +831,7 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
                   fontSize: 16,
                 ),
               ),
-              DropdownButton<String>(
+DropdownButton<String>(
                 value: bus['type'],
                 items: _busTypes.map((String type) {
                   return DropdownMenuItem<String>(

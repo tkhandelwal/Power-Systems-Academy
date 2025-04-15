@@ -9,6 +9,7 @@ class NECReferenceScreen extends StatefulWidget {
   NECReferenceScreenState createState() => NECReferenceScreenState();
 }
 
+
 class NECReferenceScreenState extends State<NECReferenceScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -402,15 +403,10 @@ class NECReferenceScreenState extends State<NECReferenceScreen> {
   }
   
   @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
+      initialIndex: _currentTabIndex,
       child: Scaffold(
         appBar: AppBar(
           title: _isSearching
