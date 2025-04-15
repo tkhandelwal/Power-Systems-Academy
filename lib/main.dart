@@ -13,6 +13,17 @@ import 'package:powersystemsacademy/calculators/power_factor_calculator.dart';
 import 'package:powersystemsacademy/calculators/transformer_sizing_calculator.dart';
 import 'package:powersystemsacademy/calculators/voltage_drop_calculator.dart';
 import 'package:powersystemsacademy/calculators/short_circuit_calculator.dart'; // Import the new calculator
+import 'package:powersystemsacademy/calculators/load_flow_calculator.dart';
+import 'package:powersystemsacademy/calculators/motor_starting_calculator.dart';
+import 'package:powersystemsacademy/calculators/protection_coordination_calculator.dart';
+import 'package:powersystemsacademy/screens/power_formulas_screen.dart';
+
+import 'package:powersystemsacademy/screens/pe_exam_prep_screen.dart';
+import 'package:powersystemsacademy/screens/pe_exam_planner_screen.dart';
+import 'package:powersystemsacademy/screens/practice_questions_screen.dart';
+import 'package:powersystemsacademy/screens/nec_reference_screen.dart';
+
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:provider/provider.dart';
@@ -135,6 +146,14 @@ class PowerEngineeringPrepApp extends StatelessWidget {
         '/calculators/voltage_drop': (context) => VoltageDropCalculatorScreen(),
         '/calculators/transformer_sizing': (context) => TransformerSizingCalculatorScreen(),
         '/calculators/short_circuit': (context) => ShortCircuitCalculatorScreen(), // Add route for the new calculator
+        '/calculators/load_flow': (context) => LoadFlowCalculatorScreen(),
+        '/calculators/motor_starting': (context) => MotorStartingCalculatorScreen(),
+        '/calculators/protection_coordination': (context) => ProtectionCoordinationCalculatorScreen(),
+        '/power_formulas': (context) => PowerFormulasScreen(),
+        '/pe_exam_prep': (context) => PEExamPrepScreen(),
+        '/pe_exam_planner': (context) => PEExamPlannerScreen(),
+        '/practice_questions': (context) => PracticeQuestionsScreen(),
+        '/nec_reference': (context) => NECReferenceScreen(),
         '/learning_resources': (context) => LearningResourcesScreen(),
         '/community': (context) => CommunityScreen(),
         '/news': (context) => NewsScreen(),

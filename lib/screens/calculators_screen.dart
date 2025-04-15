@@ -5,6 +5,10 @@ import 'package:powersystemsacademy/calculators/power_factor_calculator.dart';
 import 'package:powersystemsacademy/calculators/transformer_sizing_calculator.dart';
 import 'package:powersystemsacademy/calculators/voltage_drop_calculator.dart';
 import 'package:powersystemsacademy/calculators/short_circuit_calculator.dart'; // Import the new calculator
+import 'package:powersystemsacademy/calculators/load_flow_calculator.dart';
+import 'package:powersystemsacademy/calculators/motor_starting_calculator.dart';
+import 'package:powersystemsacademy/calculators/protection_coordination_calculator.dart';
+
 
 // Updated CalculatorsScreen to avoid deprecated color methods
 class CalculatorsScreen extends StatelessWidget {
@@ -29,6 +33,8 @@ class CalculatorsScreen extends StatelessWidget {
               {'name': 'Transformer Sizing', 'implemented': true},
               {'name': 'Voltage Drop', 'implemented': true},
               {'name': 'Short Circuit Analysis', 'implemented': true},
+              {'name': 'Load Flow Analysis', 'implemented': true}, // Add this new line
+
             ],
             onCategoryTap: () {
               // Navigate to power systems calculators list
@@ -43,8 +49,8 @@ class CalculatorsScreen extends StatelessWidget {
             calculators: [
               {'name': 'Conductor Sizing', 'implemented': false},
               {'name': 'Conduit Fill', 'implemented': false},
-              {'name': 'Circuit Breaker Coordination', 'implemented': false},
-              {'name': 'Motor Starting', 'implemented': false},
+              {'name': 'Circuit Breaker Coordination', 'implemented': true},
+              {'name': 'Motor Starting', 'implemented': true},
               {'name': 'Short Circuit', 'implemented': false},
             ],
             onCategoryTap: () {
@@ -217,6 +223,27 @@ class CalculatorCategoryCard extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ShortCircuitCalculatorScreen(),
+                          ),
+                        );
+                        } else if (calculator['name'] == 'Load Flow Analysis' && calculator['implemented']) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoadFlowCalculatorScreen(),
+                          ),
+                        );
+                        } else if (calculator['name'] == 'Motor Starting' && calculator['implemented']) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MotorStartingCalculatorScreen(),
+                          ),
+                        );
+                        } else if (calculator['name'] == 'Circuit Breaker Coordination' && calculator['implemented']) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProtectionCoordinationCalculatorScreen(),
                           ),
                         );
                           } else if (!calculator['implemented']) {
