@@ -23,7 +23,7 @@ import 'package:powersystemsacademy/screens/pe_exam_planner_screen.dart';
 import 'package:powersystemsacademy/screens/practice_questions_screen.dart';
 import 'package:powersystemsacademy/screens/nec_reference_screen.dart';
 
-
+import 'package:powersystemsacademy/screens/calculator_hub_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:provider/provider.dart';
@@ -140,7 +140,7 @@ class PowerEngineeringPrepApp extends StatelessWidget {
       routes: {
         '/': (context) => HomeScreen(),
         '/study_materials': (context) => StudyMaterialsScreen(),
-        '/calculators': (context) => CalculatorsScreen(),
+        '/calculators': (context) => CalculatorHubScreen(),
         '/calculators/three_phase': (context) => ThreePhaseCalculatorScreen(),
         '/calculators/power_factor': (context) => PowerFactorCalculatorScreen(),
         '/calculators/voltage_drop': (context) => VoltageDropCalculatorScreen(),
@@ -154,6 +154,7 @@ class PowerEngineeringPrepApp extends StatelessWidget {
         '/pe_exam_planner': (context) => PEExamPlannerScreen(),
         '/practice_questions': (context) => PracticeQuestionsScreen(),
         '/nec_reference': (context) => NECReferenceScreen(),
+        '/calculators/hub': (context) => CalculatorHubScreen(),
         '/learning_resources': (context) => LearningResourcesScreen(),
         '/community': (context) => CommunityScreen(),
         '/news': (context) => NewsScreen(),
