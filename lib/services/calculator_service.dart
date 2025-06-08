@@ -1,5 +1,5 @@
 // lib/services/calculator_service.dart
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -29,7 +29,9 @@ class CalculatorService {
           .map((jsonStr) => Map<String, dynamic>.from(json.decode(jsonStr)))
           .toList();
     } catch (e) {
-      print('Error loading recent calculators: $e');
+      if (kDebugMode) {
+        print('Error loading recent calculators: $e');
+      }
       return [];
     }
   }
@@ -63,7 +65,9 @@ class CalculatorService {
       
       await prefs.setStringList(_recentCalculatorsKey, updatedJsonList);
     } catch (e) {
-      print('Error saving recent calculators: $e');
+      if (kDebugMode) {
+        print('Error saving recent calculators: $e');
+      }
     }
   }
   
@@ -102,7 +106,9 @@ class CalculatorService {
       // Save back to preferences
       await prefs.setString(_savedCalculationsKey, json.encode(savedCalculations));
     } catch (e) {
-      print('Error saving calculation: $e');
+      if (kDebugMode) {
+        print('Error saving calculation: $e');
+      }
     }
   }
   
@@ -122,7 +128,9 @@ class CalculatorService {
       
       return [];
     } catch (e) {
-      print('Error loading saved calculations: $e');
+      if (kDebugMode) {
+        print('Error loading saved calculations: $e');
+      }
       return [];
     }
   }
@@ -138,7 +146,7 @@ class CalculatorService {
       
       // Get calculator-specific saved calculations
       if (savedCalculations.containsKey(calculatorType)) {
-        List<Map<String, dynamic>> calculatorSaved = 
+        List<Map<String, dynamic>> calculatorSaved =
             List<Map<String, dynamic>>.from(savedCalculations[calculatorType]);
         
         // Remove the specified calculation
@@ -153,7 +161,9 @@ class CalculatorService {
         }
       }
     } catch (e) {
-      print('Error deleting saved calculation: $e');
+      if (kDebugMode) {
+        print('Error deleting saved calculation: $e');
+      }
     }
   }
   
@@ -161,6 +171,8 @@ class CalculatorService {
   Future<void> logCalculatorUsage(String calculatorType) async {
     // Implementation for usage analytics
     // This could be expanded in the future
-    print('Calculator used: $calculatorType at ${DateTime.now()}');
+    if (kDebugMode) {
+      print('Calculator used: $calculatorType at ${DateTime.now()}');
+    }
   }
 }

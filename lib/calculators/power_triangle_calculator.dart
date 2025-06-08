@@ -401,7 +401,7 @@ class PowerTriangleCalculatorScreenState extends State<PowerTriangleCalculatorSc
         SizedBox(height: 8),
         ResultItem(
           label: 'Power Factor:',
-          value: '${_resultPowerFactor.toStringAsFixed(3)}',
+          value: _resultPowerFactor.toStringAsFixed(3),
           icon: Icons.speed,
           iconColor: Colors.orange,
         ),

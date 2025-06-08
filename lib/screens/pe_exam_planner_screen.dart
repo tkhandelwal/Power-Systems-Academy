@@ -1,6 +1,8 @@
 // lib/screens/pe_exam_planner_screen.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:powersystemsacademy/services/exam_service.dart';
+import 'package:powersystemsacademy/models/exam_content_models.dart';
 
 class PEExamPlannerScreen extends StatefulWidget {
   const PEExamPlannerScreen({super.key});
@@ -10,112 +12,54 @@ class PEExamPlannerScreen extends StatefulWidget {
 }
 
 class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
-  DateTime? _examDate;
   final TextEditingController _studyHoursController = TextEditingController(text: '20');
+  final ExamService _examService = ExamService();
   
-  final List<ExamTopic> _examTopics = [
-    ExamTopic(
-      name: 'General Power Engineering Concepts',
-      percentage: 7,
-      subtopics: [
-        'Basic Electrical Engineering Principles',
-        'Power Engineering Economics',
-        'Power System Fundamentals',
-      ],
-    ),
-    ExamTopic(
-      name: 'Circuit Analysis',
-      percentage: 10,
-      subtopics: [
-        'DC Circuits',
-        'AC Circuits',
-        'Three-Phase Circuits',
-        'Circuit Theorems',
-      ],
-    ),
-    ExamTopic(
-      name: 'Measurement and Instrumentation',
-      percentage: 8,
-      subtopics: [
-        'Metering Devices',
-        'Current and Voltage Transformers',
-        'Instrument Calibration and Error Analysis',
-      ],
-    ),
-    ExamTopic(
-      name: 'Rotating Machines',
-      percentage: 15,
-      subtopics: [
-        'Generators',
-        'Synchronous Motors',
-        'Induction Motors',
-        'DC Motors',
-        'Starting and Speed Control',
-      ],
-    ),
-    ExamTopic(
-      name: 'Transformers',
-      percentage: 12,
-      subtopics: [
-        'Principles and Operation',
-        'Types and Connections',
-        'Testing and Analysis',
-        'Protection and Cooling',
-      ],
-    ),
-    ExamTopic(
-      name: 'Transmission and Distribution',
-      percentage: 14,
-      subtopics: [
-        'Transmission Line Parameters',
-        'Underground Cables',
-        'Voltage Regulation',
-        'Distribution Systems',
-      ],
-    ),
-    ExamTopic(
-      name: 'Power System Protection',
-      percentage: 12,
-      subtopics: [
-        'Protective Relaying',
-        'Circuit Breakers and Fuses',
-        'Coordination Studies',
-        'System Grounding',
-      ],
-    ),
-    ExamTopic(
-      name: 'Power System Analysis',
-      percentage: 11,
-      subtopics: [
-        'Load Flow Studies',
-        'Short Circuit Analysis',
-        'Stability Analysis',
-        'Fault Calculations',
-      ],
-    ),
-    ExamTopic(
-      name: 'Codes and Standards',
-      percentage: 11,
-      subtopics: [
-        'National Electrical Code (NEC)',
-        'NESC',
-        'IEEE Standards',
-        'NFPA Standards',
-      ],
-    ),
-  ];
-  
+  DateTime? _examDate;
+  List<Topic> _topics = [];
   List<StudyPlanItem> _studyPlan = [];
-
+  bool _isLoading = true;
+  
   @override
   void initState() {
     super.initState();
+    _loadData();
   }
   
   @override
   void dispose() {
     _studyHoursController.dispose();
     super.dispose();
+  }
+  
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      // Load topics
+      _topics = await _examService.getTopics();
+      
+      // Load exam plan
+      var examPlan = await _examService.getExamPlan();
+      if (examPlan != null && examPlan['exam_date'] != null) {
+        _examDate = DateTime.parse(examPlan['exam_date']);
+        _studyHoursController.text = examPlan['weekly_study_hours'].toString();
+        
+        // Generate study plan based on saved data
+        _generateStudyPlan();
+      }
+      
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading exam data: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
   
   void _selectExamDate() async {
@@ -135,86 +79,119 @@ class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
   }
   
   void _generateStudyPlan() {
-  if (_examDate == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Please select an exam date first'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    return;
-  }
-  
-  // Parse weekly study hours
-  int weeklyStudyHours;
-  try {
-    weeklyStudyHours = int.parse(_studyHoursController.text);
-    if (weeklyStudyHours <= 0) throw FormatException();
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Please enter a valid number of study hours'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    return;
-  }
+    if (_examDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please select an exam date first'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     
-  // Calculate weeks available for study
-  final DateTime now = DateTime.now();
-  final int daysUntilExam = _examDate!.difference(now).inDays;
-  final int weeksUntilExam = (daysUntilExam / 7).ceil();
-  
-  if (weeksUntilExam <= 0) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Exam date must be in the future'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    return;
-  }
+    // Parse weekly study hours
+    int weeklyStudyHours;
+    try {
+      weeklyStudyHours = int.parse(_studyHoursController.text);
+      if (weeklyStudyHours <= 0) throw FormatException();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter a valid number of study hours'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     
-   // Clear existing plan
-  _studyPlan = [];
+    // Save exam plan to database
+    _examService.saveExamPlan(_examDate!, weeklyStudyHours);
+      
+    // Calculate weeks available for study
+    final DateTime now = DateTime.now();
+    final int daysUntilExam = _examDate!.difference(now).inDays;
+    final int weeksUntilExam = (daysUntilExam / 7).ceil();
     
+    if (weeksUntilExam <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Exam date must be in the future'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+      
+    // Clear existing plan
+    _studyPlan = [];
+      
     // Calculate total study hours available
-  final int totalStudyHours = weeksUntilExam * weeklyStudyHours;
-    
-    // Allocate hours proportionally to topics based on exam percentage
+    final int totalStudyHours = weeksUntilExam * weeklyStudyHours;
+      
+    // Allocate hours proportionally to topics based on relevance/size
     int totalHoursAllocated = 0;
-    
-    for (final topic in _examTopics) {
-    // Calculate hours for this topic
-    final int topicHours = ((totalStudyHours * topic.percentage) / 100).round();
-    totalHoursAllocated += topicHours;
-    
-    // Calculate weeks needed for this topic
-    final int weeksForTopic = (topicHours / weeklyStudyHours).ceil();
-    
-    // Create study plan item
-    _studyPlan.add(
-      StudyPlanItem(
-        topic: topic.name,
-        totalHours: topicHours,
-        weeksAllocated: weeksForTopic,
-        subtopics: topic.subtopics,
-      ),
-    );
-  }
-
-   // Verify that all hours are allocated (with possible small rounding differences)
-  // and display a message if there's a significant discrepancy
-  if ((totalHoursAllocated - totalStudyHours).abs() > totalStudyHours * 0.05) {
-    // If more than 5% difference between allocated and total available hours
-    print('Warning: Allocated hours ($totalHoursAllocated) significantly differ from total available hours ($totalStudyHours)');
-    
-    // Optionally adjust the plan if needed
-    // This is where you could redistribute hours to match the total more closely
-  }
-    
+      
+    for (final topic in _topics) {
+      // Calculate importance factor (1-2 range) - could be based on exam weighting
+      double importanceFactor = 1.0;
+      if (topic.name.contains('Power System') || topic.name.contains('Protection')) {
+        importanceFactor = 1.5; // More important topics
+      }
+        
+      // Calculate hours for this topic (weighted by importance)
+      final int topicHours = ((totalStudyHours * importanceFactor) / _topics.length).round();
+      totalHoursAllocated += topicHours;
+      
+      // Calculate weeks needed for this topic
+      final int weeksForTopic = (topicHours / weeklyStudyHours).ceil();
+      
+      // Create study plan item
+      _studyPlan.add(
+        StudyPlanItem(
+          topic: topic.name,
+          totalHours: topicHours,
+          weeksAllocated: weeksForTopic,
+          subtopics: [], // Will be populated below
+        ),
+      );
+        
+      // Load subtopics for each topic and add to study plan
+      _loadSubtopicsForTopic(topic, _studyPlan.length - 1);
+    }
+  
+    // Verify that all hours are allocated (with possible small rounding differences)
+    if ((totalHoursAllocated - totalStudyHours).abs() > totalStudyHours * 0.05) {
+      // If more than 5% difference between allocated and total available hours
+      print('Warning: Allocated hours ($totalHoursAllocated) significantly differ from total available hours ($totalStudyHours)');
+      
+      // Adjust last topic to match total hours if needed
+      if (_studyPlan.isNotEmpty) {
+        int lastTopicHours = _studyPlan.last.totalHours;
+        int adjustment = totalStudyHours - (totalHoursAllocated - lastTopicHours);
+        
+        if (adjustment > 0) {
+          setState(() {
+            _studyPlan.last.totalHours = adjustment;
+            _studyPlan.last.weeksAllocated = (adjustment / weeklyStudyHours).ceil();
+          });
+        }
+      }
+    }
+      
     // Refresh UI
     setState(() {});
+  }
+  
+  Future<void> _loadSubtopicsForTopic(Topic topic, int planIndex) async {
+    try {
+      List<Subtopic> subtopics = await _examService.getSubtopicsForTopic(topic.id);
+      
+      setState(() {
+        _studyPlan[planIndex].subtopics = subtopics.map((s) => s.name).toList();
+      });
+    } catch (e) {
+      print('Error loading subtopics for topic ${topic.name}: $e');
+    }
   }
   
   void _exportStudyPlan() {
@@ -241,29 +218,31 @@ class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildExamInfoCard(),
-            SizedBox(height: 16),
-            if (_studyPlan.isNotEmpty) ...[
-              Text(
-                'Your Personalized Study Plan',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildExamInfoCard(),
+                  SizedBox(height: 16),
+                  if (_studyPlan.isNotEmpty) ...[
+                    Text(
+                      'Your Personalized Study Plan',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    ..._buildStudyPlanWidgets(),
+                  ] else ...[
+                    _buildTopicsOverviewCard(),
+                  ],
+                ],
               ),
-              SizedBox(height: 8),
-              ..._buildStudyPlanWidgets(),
-            ] else ...[
-              _buildTopicsOverviewCard(),
-            ],
-          ],
-        ),
-      ),
+            ),
     );
   }
   
@@ -365,8 +344,8 @@ class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
               ),
             ),
             SizedBox(height: 16),
-            ...List.generate(_examTopics.length, (index) {
-              final topic = _examTopics[index];
+            ...List.generate(_topics.length, (index) {
+              final topic = _topics[index];
               return Padding(
                 padding: EdgeInsets.only(bottom: 12.0),
                 child: Row(
@@ -382,7 +361,7 @@ class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
                       child: Text(topic.name),
                     ),
                     Text(
-                      '${topic.percentage}%',
+                      '${topic.progressPercentage}%',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
@@ -521,23 +500,26 @@ class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
                   ),
                 ),
                 SizedBox(height: 4),
-                ...item.subtopics.map((subtopic) => Padding(
-                      padding: EdgeInsets.only(bottom: 4.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            size: 16,
-                            color: Colors.green,
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(subtopic),
-                          ),
-                        ],
-                      ),
-                    )),
+                if (item.subtopics.isEmpty)
+                  Text('Loading subtopics...')
+                else
+                  ...item.subtopics.map((subtopic) => Padding(
+                    padding: EdgeInsets.only(bottom: 4.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          size: 16,
+                          color: Colors.green,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(subtopic),
+                        ),
+                      ],
+                    ),
+                  )),
                 SizedBox(height: 16),
                 Row(
                   children: [
@@ -545,6 +527,7 @@ class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
                       child: OutlinedButton.icon(
                         onPressed: () {
                           // Would navigate to related study materials
+                          Navigator.pushNamed(context, '/study_materials');
                         },
                         icon: Icon(Icons.book),
                         label: Text('Study Materials'),
@@ -555,6 +538,11 @@ class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () {
                           // Would navigate to practice questions for this topic
+                          Navigator.pushNamed(
+                            context, 
+                            '/practice_questions',
+                            arguments: {'topicName': item.topic},
+                          );
                         },
                         icon: Icon(Icons.quiz),
                         label: Text('Practice Questions'),
@@ -578,23 +566,11 @@ class PEExamPlannerScreenState extends State<PEExamPlannerScreen> {
   }
 }
 
-class ExamTopic {
-  final String name;
-  final int percentage;
-  final List<String> subtopics;
-  
-  ExamTopic({
-    required this.name,
-    required this.percentage,
-    required this.subtopics,
-  });
-}
-
 class StudyPlanItem {
   final String topic;
-  final int totalHours;
-  final int weeksAllocated;
-  final List<String> subtopics;
+  int totalHours;
+  int weeksAllocated;
+  List<String> subtopics;
   
   StudyPlanItem({
     required this.topic,

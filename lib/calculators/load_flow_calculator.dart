@@ -98,11 +98,12 @@ class LoadFlowCalculatorScreenState extends State<LoadFlowCalculatorScreen> {
       
       // Create arrays for bus data
       List<Map<String, dynamic>> busData = [];
-      for (var bus in _buses) {
+      for (var i = 0; i < _buses.length; i++) {
+        var bus = _buses[i];
         busData.add({
           'number': bus['number'],
           'type': bus['type'],
-          'voltage': double.parse(bus['voltage'].text),
+          'voltage': i == 0 ? slackBusVoltage : double.parse(bus['voltage'].text),
           'angle': double.parse(bus['angle'].text) * (pi / 180), // Convert to radians
           'activePower': double.parse(bus['activePower'].text),
           'reactivePower': double.parse(bus['reactivePower'].text),

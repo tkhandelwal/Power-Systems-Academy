@@ -1,6 +1,5 @@
 // lib/utils/calculator_utilities.dart
 import 'dart:math';
-import 'package:flutter/material.dart';
 
 /// Utility class with helper methods for calculator functions
 class CalculatorUtilities {

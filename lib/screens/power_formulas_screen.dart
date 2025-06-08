@@ -478,8 +478,8 @@ class PowerFormulasScreenState extends State<PowerFormulasScreen> {
         onPressed: () {
           _showBookmarkDialog(context);
         },
-        child: Icon(Icons.bookmark),
         tooltip: 'View Bookmarked Formulas',
+        child: Icon(Icons.bookmark),
       ),
     );
   }

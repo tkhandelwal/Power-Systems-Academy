@@ -65,7 +65,7 @@ class EducationalContentState extends State<EducationalContent> {
         // Expanded content
         if (_expanded) ...[
           Divider(),
-          ...widget.sections.map((section) => _buildSection(section)).toList(),
+          ...widget.sections.map((section) => _buildSection(section)),
           
           // Related formula reference if provided
           if (widget.relatedFormulaReference != null) ...[

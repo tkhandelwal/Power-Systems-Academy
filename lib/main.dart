@@ -1,6 +1,6 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:powersystemsacademy/screens/home_screen.dart';
-import 'package:powersystemsacademy/screens/calculators_screen.dart';
 import 'package:powersystemsacademy/screens/community_screen.dart';
 import 'package:powersystemsacademy/screens/learning_resources_screen.dart';
 import 'package:powersystemsacademy/screens/news_screen.dart';
@@ -12,20 +12,22 @@ import 'package:powersystemsacademy/calculators/three_phase_power_calculator.dar
 import 'package:powersystemsacademy/calculators/power_factor_calculator.dart';
 import 'package:powersystemsacademy/calculators/transformer_sizing_calculator.dart';
 import 'package:powersystemsacademy/calculators/voltage_drop_calculator.dart';
-import 'package:powersystemsacademy/calculators/short_circuit_calculator.dart'; // Import the new calculator
+import 'package:powersystemsacademy/calculators/short_circuit_calculator.dart';
 import 'package:powersystemsacademy/calculators/load_flow_calculator.dart';
 import 'package:powersystemsacademy/calculators/motor_starting_calculator.dart';
 import 'package:powersystemsacademy/calculators/protection_coordination_calculator.dart';
 import 'package:powersystemsacademy/screens/power_formulas_screen.dart';
 
+// Add imports for our new database-driven screens
 import 'package:powersystemsacademy/screens/pe_exam_prep_screen.dart';
 import 'package:powersystemsacademy/screens/pe_exam_planner_screen.dart';
 import 'package:powersystemsacademy/screens/practice_questions_screen.dart';
 import 'package:powersystemsacademy/screens/nec_reference_screen.dart';
-
+import 'package:powersystemsacademy/screens/topic_detail_screen.dart';
 import 'package:powersystemsacademy/screens/calculator_hub_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:powersystemsacademy/models/exam_content_models.dart'; // For Topic model
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
 // Theme provider to manage app theme throughout the app
@@ -145,7 +147,7 @@ class PowerEngineeringPrepApp extends StatelessWidget {
         '/calculators/power_factor': (context) => PowerFactorCalculatorScreen(),
         '/calculators/voltage_drop': (context) => VoltageDropCalculatorScreen(),
         '/calculators/transformer_sizing': (context) => TransformerSizingCalculatorScreen(),
-        '/calculators/short_circuit': (context) => ShortCircuitCalculatorScreen(), // Add route for the new calculator
+        '/calculators/short_circuit': (context) => ShortCircuitCalculatorScreen(),
         '/calculators/load_flow': (context) => LoadFlowCalculatorScreen(),
         '/calculators/motor_starting': (context) => MotorStartingCalculatorScreen(),
         '/calculators/protection_coordination': (context) => ProtectionCoordinationCalculatorScreen(),
@@ -160,6 +162,25 @@ class PowerEngineeringPrepApp extends StatelessWidget {
         '/news': (context) => NewsScreen(),
         '/profile': (context) => ProfileScreen(),
         '/settings': (context) => SettingsScreen(),
+      },
+      // Add route generator for parameterized routes (like topic detail)
+      onGenerateRoute: (settings) {
+        if (settings.name == '/topic_detail') {
+          final args = settings.arguments as Map<String, dynamic>;
+          final topic = args['topic'] as Topic;
+          return MaterialPageRoute(
+            builder: (context) => TopicDetailScreen(topic: topic),
+          );
+        }
+        if (settings.name == '/practice_questions') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => PracticeQuestionsScreen(arguments: args),
+          );
+        }
+        
+        // If no match, let the routes above handle it
+        return null;
       },
     );
   }
